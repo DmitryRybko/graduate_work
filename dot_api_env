@@ -1,0 +1,11 @@
+PROJECT_NAME=movies_api
+
+ES_HOST=elasticsearch
+ES_PORT=9200
+
+INDEX_NAME=film_work
+INDEX_NAME_GENRE=genres
+INDEX_NAME_PERSONS=persons
+
+REDIS_HOST=auth_redis
+REDIS_PORT=6379

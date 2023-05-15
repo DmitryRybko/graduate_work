@@ -1,0 +1,21 @@
+DB_NAME=movies_database
+DB_USER=some_user
+DB_PASSWORD=some_password
+SECRET_KEY=some_secret_key
+DSN_OPTIONS='-c search_path=content'
+
+DB_HOST=movies_db
+DB_PORT=5432
+
+ES_HOST="elasticsearch"
+ES_PORT="9200"
+
+INDEX_NAME="film_work"
+INDEX_NAME_GENRE="genres"
+INDEX_NAME_PERSONS="persons"
+
+STARTING_TIME="2000-06-16 23:14:09.200 +0300"
+
+STATE_STORAGE_FILE="state_file.txt"
+
+ETL_SLEEP_TIME=10

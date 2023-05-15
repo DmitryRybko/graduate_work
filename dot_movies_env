@@ -1,0 +1,16 @@
+DB_NAME=movies_database
+DB_USER=app
+DB_PASSWORD=123qwe
+SECRET_KEY=some_secret_key
+DSN_OPTIONS='-c search_path=content'
+
+DB_HOST=movies_db
+DB_PORT=5432
+
+POSTGRES_HOST='movies_db'
+POSTGRES_PORT='5432'
+POSTGRES_USER='app'
+POSTGRES_PASSWORD='123qwe'
+POSTGRES_DB='movies_database'
+
+ALLOWED_HOSTS='0.0.0.0,localhost'
