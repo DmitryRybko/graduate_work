@@ -1,0 +1,100 @@
+version: '3'
+services:
+  nginx:
+    container_name: final_nginx
+    image: nginx:1.19.2
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/oauth2.js:/etc/nginx/conf.d/oauth2.js:ro
+      - movies_admin_static_data:/data/:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - "auth"
+      - "api_service"
+
+  auth:
+    container_name: final_auth
+    environment:
+      - DEBUG=1
+    build: ./Auth_sprint_2/flask_auth
+    env_file: ./.auth.env
+    depends_on:
+      - "auth_redis"
+      - "auth_db"
+    ports:
+      - "8002:8002"
+  
+  auth_redis:
+    container_name: final_auth_redis
+    image: redis
+    restart: always
+  
+  auth_db:
+    container_name: final_auth_postgres
+    image: postgres:13
+    restart: always
+    volumes:
+      - auth_db:/var/lib/postgresql/data
+    ports:
+      - "54321:5432"
+    env_file: ./.auth.env
+
+  api_service:
+    container_name: final_api
+    build: ./Auth_sprint_2/async_fastapi_service
+    env_file: ./.api.env
+    depends_on:
+      - "elasticsearch"
+      - "api_redis"
+      - "auth"
+    ports:
+      - "8001:8001"
+  
+  api_redis:
+    container_name: final_api_redis
+    image: redis
+    restart: always
+  
+  elasticsearch:
+    container_name: final_elasticsearch
+    image: elasticsearch:7.7.0
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    restart: always
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+
+  etl:
+    container_name: final_etl
+    build: ./new_admin_panel_sprint_3/etl/main_project/etl_process
+    env_file: ./.etl.env
+    depends_on:
+      - "elasticsearch"
+      - "movies_db"
+  
+  movies_db:
+    container_name: final_movies_db
+    image: postgres:13
+    restart: always
+    volumes:
+      - movies_db:/var/lib/postgresql/data
+    ports:
+      - "54322:5432"
+    env_file: ./.movies.env
+  
+  movies_admin:
+    container_name: final_movies_admin
+    build: ./new_admin_panel_sprint_3/etl/main_project/movies_admin
+    env_file: ./.movies.env
+    ports:
+      - "8000:8000"
+
+volumes:
+  auth_db:
+  movies_admin_static_data:
+  movies_db:
+  esdata:
