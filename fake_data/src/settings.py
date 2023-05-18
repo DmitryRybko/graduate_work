@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     person_filmwork_table_name: str = 'person_film_work'
 
     genres_size: int = 100
-    person_size: int = 500000
-    filmwork_size: int = 100000
+    person_size: int = 5000
+    filmwork_size: int = 1000
 
     batch_size: int = 1000
 

@@ -4,6 +4,7 @@
 # default libs
 import random
 from datetime import date
+from time import sleep
 from typing import Generator
 from uuid import uuid4
 
@@ -33,22 +34,30 @@ def wait_when_all_tables_available(timeout_min: int = 2):
         timeout = timeout_min * 60
         while timeout > 0:
             try:
-                pg_cur(f'SELECT count(*) FROM {settings.filmwork_table_name}')
-                pg_cur(f'SELECT count(*) FROM {settings.genre_table_name}')
-                pg_cur(f'SELECT count(*) FROM {settings.person_table_name}')
-                pg_cur(
+                pg_cur.execute(
+                    f'SELECT count(*) FROM {settings.filmwork_table_name}'
+                )
+                pg_cur.execute(
+                    f'SELECT count(*) FROM {settings.genre_table_name}'
+                )
+                pg_cur.execute(
+                    f'SELECT count(*) FROM {settings.person_table_name}'
+                )
+                pg_cur.execute(
                     (
                         'SELECT count(*) FROM '
                         f'{settings.person_filmwork_table_name}'
                     )
                 )
-                pg_cur(
+                pg_cur.execute(
                     (
                         'SELECT count(*) FROM '
                         f'{settings.genre_filmwork_table_name}'
                     )
                 )
-            except Exception:
+            except Exception as e:
+                print(e)
+                sleep(1)
                 timeout -= 1
             else:
                 return
@@ -240,6 +249,8 @@ def main():
     """Generate fake data."""
     if settings.debug:
         wait_db.main()
+        wait_when_all_tables_available()
+
         generate_genres()
         generate_persons()
         generate_filmworks()
