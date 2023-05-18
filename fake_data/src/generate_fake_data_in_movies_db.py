@@ -21,10 +21,42 @@ from utils import wait_db
 fake: Faker = Faker(['it_IT', 'en_US', 'ja_JP', 'de_DE', 'fr_FR'])
 
 
+def wait_when_all_tables_available(timeout_min: int = 2):
+    """Wait when all tables is available."""
+    with psycopg2.connect(
+        dbname=settings.POSTGRES_DB,
+        user=settings.POSTGRES_USER,
+        password=settings.POSTGRES_PASSWORD,
+        host=settings.POSTGRES_HOST,
+        port=settings.POSTGRES_PORT
+    ) as pg_conn, pg_conn.cursor() as pg_cur:
+        timeout = timeout_min * 60
+        while timeout > 0:
+            try:
+                pg_cur(f'SELECT count(*) FROM {settings.filmwork_table_name}')
+                pg_cur(f'SELECT count(*) FROM {settings.genre_table_name}')
+                pg_cur(f'SELECT count(*) FROM {settings.person_table_name}')
+                pg_cur(
+                    (
+                        'SELECT count(*) FROM '
+                        f'{settings.person_filmwork_table_name}'
+                    )
+                )
+                pg_cur(
+                    (
+                        'SELECT count(*) FROM '
+                        f'{settings.genre_filmwork_table_name}'
+                    )
+                )
+            except Exception:
+                timeout -= 1
+            else:
+                return
+        raise Exception('Exception. Timeout. Waiting of tables.')
+
+
 def write_to_db(table_name: str, values: list):
     """Write data to the DB."""
-    print(table_name)
-    print(values)
     with psycopg2.connect(
         dbname=settings.POSTGRES_DB,
         user=settings.POSTGRES_USER,
@@ -33,23 +65,21 @@ def write_to_db(table_name: str, values: list):
         port=settings.POSTGRES_PORT
     ) as pg_conn, pg_conn.cursor() as pg_cur:
         fields: list = [k for k, v in values[0].dict().items()]
-        print(fields)
         items_in_request: str = ', '.join(
             ['%s' for _ in range(len(fields))]
         )
-        print(items_in_request)
         args_list: list = [
             tuple(
                 [i.dict()[f] for f in fields]
             ) for i in values
         ]
-        print(args_list)
         args: str = ','.join(
             pg_cur.mogrify(
                 f'({items_in_request})', item
             ).decode() for item in args_list
         )
-        sql: str = f'INSERT INTO {table_name} ({fields}) VALUES {args}'
+        fields_str: str = ', '.join(fields)
+        sql: str = f'INSERT INTO {table_name} ({fields_str}) VALUES {args}'
         pg_cur.execute(sql)
 
 
@@ -61,10 +91,12 @@ def data_getter(sql: str) -> Generator:
         host=settings.POSTGRES_HOST,
         port=settings.POSTGRES_PORT
     ) as pg_conn, pg_conn.cursor() as pg_cur:
+        # print(sql)
         pg_cur.execute(sql)
         while True:
             data_part = pg_cur.fetchmany(1000)
             if data_part:
+                # print(data_part)
                 yield data_part
             else:
                 return
@@ -81,14 +113,15 @@ def generate_genres() -> None:
         genres.append(
             models.Genre(id=str(uuid4()), name=i, description=fake.text())
         )
-    write_to_db(settings.genre_table_name, genres)
+    if genres:
+        write_to_db(settings.genre_table_name, genres)
 
 
 def generate_filmworks() -> None:
     """Generate fake filmworks."""
     i: int = 0
+    filmworks: list[models.Filmwork] = []
     while i < settings.filmwork_size:
-        filmworks: list[models.Filmwork] = []
         filmworks.append(
             models.Filmwork(
                 id=str(uuid4()),
@@ -106,14 +139,16 @@ def generate_filmworks() -> None:
         if len(filmworks) >= settings.batch_size:
             write_to_db(settings.filmwork_table_name, filmworks)
             filmworks = []
-    write_to_db(settings.filmwork_table_name, filmworks)
+        i += 1
+    if filmworks:
+        write_to_db(settings.filmwork_table_name, filmworks)
 
 
 def generate_persons() -> None:
     """Generate fake persons."""
     i: int = 0
+    persons: list[models.Person] = []
     while i < settings.person_size:
-        persons: list[models.Person] = []
         persons.append(
             models.Person(
                 id=str(uuid4()),
@@ -123,89 +158,88 @@ def generate_persons() -> None:
         if len(persons) >= settings.batch_size:
             write_to_db(settings.person_table_name, persons)
             persons = []
-    write_to_db(settings.person_table_name, persons)
+        i += 1
+    if persons:
+        write_to_db(settings.person_table_name, persons)
 
 
 def generate_genre_filmwork() -> None:
     """Generate relations between genre and filmwork."""
+    genre_filmworks: list[models.GenreFilmwork] = []
     for data in data_getter(f'SELECT id FROM {settings.filmwork_table_name}'):
-        for i in data:
-            genre_ids = [
-                i[0] for i in data_getter(
+        for film in data:
+            genres = [
+                i for i in data_getter(
                     (
                         f'SELECT id from {settings.genre_table_name} '
-                        f'ORDER BY RAND() LIMIT {random.randint(1, 5)}'
+                        f'ORDER BY RANDOM() LIMIT {random.randint(1, 5)}'
                     )
                 )
-            ]
-            for genre_id in genre_ids:
-                genre_filmworks: list[models.GenreFilmwork] = []
+            ][0]
+            for genre in genres:
                 genre_filmworks.append(
                     models.GenreFilmwork(
                         id=str(uuid4()),
-                        film_work_id=i[0],
-                        genre_id=genre_id
+                        film_work_id=film[0],
+                        genre_id=genre[0]
                     )
                 )
-            write_to_db(settings.genre_filmwork_table_name, genre_filmworks)
-            genre_filmworks = []
+        write_to_db(settings.genre_filmwork_table_name, genre_filmworks)
+        genre_filmworks = []
 
 
 def generate_person_filmwork() -> None:
     """Generate relations between person and filmwork."""
+    person_filmworks: list[models.PersonFilmwork] = []
     for data in data_getter(f'SELECT id FROM {settings.filmwork_table_name}'):
-        for i in data:
-            director_ids = [
-                i[0] for i in data_getter(
+        for film in data:
+            director_size = random.randint(1, 3)
+            actor_size = random.randint(3, 10)
+            writer_size = random.randint(1, 3)
+            person_size = sum((director_size, actor_size, writer_size))
+
+            person_from_db = [
+                i for i in data_getter(
                     (
-                        f'SELECT id from {settings.person_table_name} '
-                        f'ORDER BY RAND() LIMIT {random.randint(1, 3)}'
+                        f'SELECT id FROM {settings.person_table_name} '
+                        f'ORDER BY RANDOM() LIMIT {person_size}'
                     )
                 )
-            ]
-            actor_ids = [
-                i[0] for i in data_getter(
-                    (
-                        f'SELECT id from {settings.person_table_name} '
-                        f'ORDER BY RAND() LIMIT {random.randint(3, 10)}'
-                    )
-                )
-            ]
-            writer_ids = [
-                i[0] for i in data_getter(
-                    (
-                        f'SELECT id from {settings.person_table_name} '
-                        f'ORDER BY RAND() LIMIT {random.randint(1, 3)}'
-                    )
-                )
-            ]
+            ][0]
+
+            director_ids = person_from_db[:director_size]
+            actor_ids = person_from_db[director_size:actor_size+director_size]
+            writer_ids = person_from_db[actor_size+director_size:]
+
+            # print(writer_ids)
             person_sets: tuple = (
                 {'items': director_ids, 'type': 'director'},
                 {'items': actor_ids, 'type': 'actor'},
                 {'items': writer_ids, 'type': 'writer'}
             )
             for person_set in person_sets:
-                for i in person_set['items']:
-                    person_filmworks: list[models.PersonFilmwork] = []
+                for person in person_set['items']:
                     person_filmworks.append(
                         models.PersonFilmwork(
                             id=str(uuid4()),
-                            film_work_id=i[0],
-                            person_id=i,
+                            film_work_id=film[0],
+                            person_id=person[0],
                             role=person_set['type']
                         )
                     )
+            if len(person_filmworks) >= settings.batch_size:
                 write_to_db(
-                    settings.genre_filmwork_table_name, person_filmworks
+                    settings.person_filmwork_table_name, person_filmworks
                 )
                 person_filmworks = []
+    if person_filmworks:
+        write_to_db(settings.person_filmwork_table_name, person_filmworks)
 
 
 def main():
     """Generate fake data."""
     if settings.debug:
         wait_db.main()
-        print(settings)
         generate_genres()
         generate_persons()
         generate_filmworks()

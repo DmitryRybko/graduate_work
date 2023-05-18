@@ -15,9 +15,9 @@ class Settings(BaseSettings):
 
     genre_table_name: str = 'genre'
     person_table_name: str = 'person'
-    filmwork_table_name: str = 'filmwork'
-    genre_filmwork_table_name: str = 'genre_filmwork'
-    person_filmwork_table_name: str = 'person_filmwork'
+    filmwork_table_name: str = 'film_work'
+    genre_filmwork_table_name: str = 'genre_film_work'
+    person_filmwork_table_name: str = 'person_film_work'
 
     genres_size: int = 100
     person_size: int = 500000
