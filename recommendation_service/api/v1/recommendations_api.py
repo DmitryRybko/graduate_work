@@ -3,7 +3,7 @@ from fastapi import APIRouter, Response, Request
 from starlette import status
 from loguru import logger
 
-from api.v1.schemas import RecommendationsRequest, RecommendationsResponse
+from api.v1.schemas import RecommendationsResponse
 
 # since relative imports work from file that is run,
 # IDE will show error here but its not
@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.get("/", response_model=RecommendationsResponse)
 def get_recommendations(request: Request, response: Response):
-    # # в составе JWT токена приезжает user_id (email), который мы декодируем и используем для запроса в database
+    # в составе JWT токена приезжает user_id (email), который мы декодируем и используем для запроса в database
     try:
         token = request.headers["Authorization"]
         user_email = decode_jwt(token)
@@ -30,8 +30,4 @@ def get_recommendations(request: Request, response: Response):
         logger.info(f"user not logged in")
         return RecommendationsResponse(key="key", value="user not logged in")
         # brokers: list = settings.kafka_brokers
-    # topic = settings.kafka_topic_name
-    # message_producer = MessageProducer(brokers, topic)
-    # key = f'{body.key}+{user_id}'
-    # result = await message_producer.send_msg(key, body.value)
 
