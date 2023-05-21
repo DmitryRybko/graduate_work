@@ -24,3 +24,7 @@ htmlcov/
 .coverage
 .coverage.*
 *,cover
+/.api.env
+/.auth.env
+/.etl.env
+/.movies.env

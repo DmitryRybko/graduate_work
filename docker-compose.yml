@@ -18,7 +18,7 @@ services:
     container_name: final_auth
     environment:
       - DEBUG=1
-    build: ./Auth_sprint_2/flask_auth
+    build: ../Auth_sprint_2/flask_auth
     env_file: ./.auth.env
     depends_on:
       - "auth_redis"
@@ -38,12 +38,12 @@ services:
     volumes:
       - auth_db:/var/lib/postgresql/data
     ports:
-      - "54321:5432"
+      - "54321:54321"
     env_file: ./.auth.env
 
   api_service:
     container_name: final_api
-    build: ./Auth_sprint_2/async_fastapi_service
+    build: ../Auth_sprint_2/async_fastapi_service
     env_file: ./.api.env
     depends_on:
       - "elasticsearch"
@@ -70,7 +70,7 @@ services:
 
   etl:
     container_name: final_etl
-    build: ./new_admin_panel_sprint_3/etl/main_project/etl_process
+    build: ../new_admin_panel_sprint_3/etl/main_project/etl_process
     env_file: ./.etl.env
     depends_on:
       - "elasticsearch"
@@ -83,12 +83,12 @@ services:
     volumes:
       - movies_db:/var/lib/postgresql/data
     ports:
-      - "54322:5432"
+      - "5432:5432"
     env_file: ./.movies.env
   
   movies_admin:
     container_name: final_movies_admin
-    build: ./new_admin_panel_sprint_3/etl/main_project/movies_admin
+    build: ../new_admin_panel_sprint_3/etl/main_project/movies_admin
     env_file: ./.movies.env
     ports:
       - "8000:8000"
