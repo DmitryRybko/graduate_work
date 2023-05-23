@@ -1,0 +1,8 @@
+TITLE=Watching History API service
+PORT_TO_RUN=8014
+
+MONGO_DB_URL=watching_history_db
+MONGO_DB_DB_NAME=watching_history
+MONGO_DB_COLLECTION_NAME=user_history
+
+DEBUG=True

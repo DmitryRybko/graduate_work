@@ -10,6 +10,9 @@ class Config(BaseSettings):
     port_to_run: str = '8014'
 
     mongo_db_url: str = ''
+    mongo_db_db_name: str = 'db'
+    mongo_db_collection_name: str = 'collection'
+
     debug: str = 'False'
 
 
