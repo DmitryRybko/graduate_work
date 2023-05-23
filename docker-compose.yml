@@ -101,6 +101,19 @@ services:
       - "movies_db"
       - "movies_admin"
 
+  watching_history:
+    container_name: final_watching_history
+    build: ./history_api
+    env_file: ./history_api/.env
+    ports:
+      - "8014:8014"
+    depends_on:
+      - "watching_history_db"
+  
+  watching_history_db:
+    container_name: final_watching_history_db
+    image: mongo:6
+    env_file: ./history_api/.env
 
 volumes:
   auth_db:
