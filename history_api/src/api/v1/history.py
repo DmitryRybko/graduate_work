@@ -17,7 +17,7 @@ logger = getLogger(__name__)
 router: APIRouter = APIRouter()
 
 
-@router.get('/get/', response_model=Page[WatchingHistory])
+@router.get('/get/{user_id}', response_model=Page[WatchingHistory])
 async def watching_history(
     user_id: str,
     srv: WatchingHistoryService = Depends(get_watching_history_service)
