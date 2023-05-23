@@ -27,5 +27,25 @@ class Settings(BaseSettings):
 
     debug: bool = True
 
+    AUTH_POSTGRES_HOST: str = 'auth'
+    AUTH_POSTGRES_PORT: str = '5432'
+    AUTH_POSTGRES_USER: str = 'app'
+    AUTH_POSTGRES_PASSWORD: str = '123qwe'
+    AUTH_POSTGRES_DB: str = 'auth'
+
+    auth_user_table_name: str = 'user'
+    auth_role_table_name: str = 'role'
+    auth_log_history_table_name: str = 'log_history'
+
+    @classmethod
+    def auth_db_connect_data(self):
+        return {
+            'POSTGRES_DB': self.jAUTH_POSTGRES_DB,
+            'POSTGRES_HOST': self.AUTH_POSTGRES_HOST,
+            'POSTGRES_PORT': self.AUTH_POSTGRES_PORT,
+            'POSTGRES_USER': self.AUTH_POSTGRES_USER,
+            'POSTGRES_PASSWORD': self.AUTH_POSTGRES_PASSWORD
+        }
+
 
 settings = Settings()
