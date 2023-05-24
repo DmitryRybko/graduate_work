@@ -101,6 +101,12 @@ services:
       - "movies_db"
       - "movies_admin"
 
+  recommendations_redis:
+    container_name: recommendations_redis
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
 
 volumes:
   auth_db:
