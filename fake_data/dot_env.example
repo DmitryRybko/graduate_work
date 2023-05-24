@@ -1,0 +1,11 @@
+POSTGRES_HOST='movies_db'
+POSTGRES_PORT='5432'
+POSTGRES_USER='app'
+POSTGRES_PASSWORD='123qwe'
+POSTGRES_DB='movies_database'
+
+genre_table_name='content.genre'
+person_table_name='content.person'
+filmwork_table_name='content.film_work'
+genre_filmwork_table_name='content.genre_film_work'
+person_filmwork_table_name='content.person_film_work'
