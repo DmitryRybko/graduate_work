@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from config import settings
+from recommendation_service.config import settings
 import uvicorn
 
 from api.v1 import recommendations_api
