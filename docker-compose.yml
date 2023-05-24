@@ -93,6 +93,21 @@ services:
     ports:
       - "8000:8000"
   
+
+  watching_history:
+    container_name: final_watching_history
+    build: ./history_api
+    env_file: ./history_api/.env
+    ports:
+      - "8014:8014"
+    depends_on:
+      - "watching_history_db"
+  
+  watching_history_db:
+    container_name: final_watching_history_db
+    image: mongo:6
+    env_file: ./history_api/.env
+
   fake_data:
     container_name: final_fake_data
     build: ./fake_data
@@ -100,7 +115,6 @@ services:
     depends_on:
       - "movies_db"
       - "movies_admin"
-
 
 volumes:
   auth_db:
