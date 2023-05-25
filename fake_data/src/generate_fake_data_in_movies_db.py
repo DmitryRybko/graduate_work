@@ -88,7 +88,10 @@ def write_to_db(table_name: str, values: list):
             ).decode() for item in args_list
         )
         fields_str: str = ', '.join(fields)
-        sql: str = f'INSERT INTO {table_name} ({fields_str}) VALUES {args}'
+        sql: str = (
+            f'INSERT INTO {table_name} ({fields_str}) VALUES {args} '
+            'ON CONFLICT (id) DO NOTHING'
+        )
         pg_cur.execute(sql)
 
 
@@ -175,7 +178,9 @@ def generate_persons() -> None:
 def generate_genre_filmwork() -> None:
     """Generate relations between genre and filmwork."""
     genre_filmworks: list[models.GenreFilmwork] = []
-    for data in data_getter(f'SELECT id FROM {settings.filmwork_table_name}'):
+    for data in data_getter(
+        f'SELECT id FROM "{settings.filmwork_table_name}"'
+    ):
         for film in data:
             genres = [
                 i for i in data_getter(

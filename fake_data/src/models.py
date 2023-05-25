@@ -56,3 +56,31 @@ class PersonFilmwork(BaseModel):
     role: str
     film_work_id: str
     person_id: str
+
+
+class Role(BaseModel):
+    id: str
+    name: str
+
+
+class User(BaseModel):
+    id: str
+    email: str
+    password: str
+    name: str
+    is_admin: bool
+
+
+class UserRole(BaseModel):
+    user_id: str
+    role_id: str
+
+
+class LogHistory(BaseModel):
+    id: str
+    log_time: str
+    user_id: str
+
+
+class WatchingHistory(BaseModel):
+    film_id: str

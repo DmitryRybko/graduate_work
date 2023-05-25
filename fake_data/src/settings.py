@@ -13,6 +13,16 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = '123qwe'
     POSTGRES_DB: str = 'movies_database'
 
+    @property
+    def movie_db_connect_data(self):
+        return {
+            'dbname': self.POSTGRES_DB,
+            'host': self.POSTGRES_HOST,
+            'port': self.POSTGRES_PORT,
+            'user': self.POSTGRES_USER,
+            'password': self.POSTGRES_PASSWORD
+        }
+
     genre_table_name: str = 'genre'
     person_table_name: str = 'person'
     filmwork_table_name: str = 'film_work'
@@ -27,6 +37,7 @@ class Settings(BaseSettings):
 
     debug: bool = True
 
+    # Auth settings
     AUTH_POSTGRES_HOST: str = 'auth'
     AUTH_POSTGRES_PORT: str = '5432'
     AUTH_POSTGRES_USER: str = 'app'
@@ -36,16 +47,28 @@ class Settings(BaseSettings):
     auth_user_table_name: str = 'user'
     auth_role_table_name: str = 'role'
     auth_log_history_table_name: str = 'log_history'
+    auth_user_role_table_name: str = 'user_role'
 
-    @classmethod
+    @property
     def auth_db_connect_data(self):
         return {
-            'POSTGRES_DB': self.jAUTH_POSTGRES_DB,
-            'POSTGRES_HOST': self.AUTH_POSTGRES_HOST,
-            'POSTGRES_PORT': self.AUTH_POSTGRES_PORT,
-            'POSTGRES_USER': self.AUTH_POSTGRES_USER,
-            'POSTGRES_PASSWORD': self.AUTH_POSTGRES_PASSWORD
+            'dbname': self.AUTH_POSTGRES_DB,
+            'host': self.AUTH_POSTGRES_HOST,
+            'port': self.AUTH_POSTGRES_PORT,
+            'user': self.AUTH_POSTGRES_USER,
+            'password': self.AUTH_POSTGRES_PASSWORD
         }
+
+    role_size: int = 100
+    user_size: int = 1000
+    log_history: int = 1000
+
+    # watching history
+    watching_history_size: int = 1000
+
+    mongo_db_url: str = ''
+    mongo_db_db_name: str = 'db'
+    mongo_db_collection_name: str = 'collection'
 
 
 settings = Settings()

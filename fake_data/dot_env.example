@@ -9,3 +9,13 @@ person_table_name='content.person'
 filmwork_table_name='content.film_work'
 genre_filmwork_table_name='content.genre_film_work'
 person_filmwork_table_name='content.person_film_work'
+
+AUTH_POSTGRES_HOST='auth_db'
+AUTH_POSTGRES_PORT=5432
+AUTH_POSTGRES_USER=app
+AUTH_POSTGRES_PASSWORD=123qwe
+AUTH_POSTGRES_DB=auth
+
+MONGO_DB_URL=watching_history_db
+MONGO_DB_DB_NAME=watching_history
+MONGO_DB_COLLECTION_NAME=user_history

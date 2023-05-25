@@ -3,7 +3,7 @@
 
 # default libs
 import random
-from datetime import date
+from datetime import datetime, timedelta
 from time import sleep
 from typing import Generator
 from uuid import uuid4
@@ -11,10 +11,10 @@ from uuid import uuid4
 # third party libs
 import psycopg2
 from faker import Faker
+from werkzeug.security import generate_password_hash
 
 # project imports
 import models
-from genres import genre_list
 from settings import settings
 from utils import wait_db
 
@@ -24,8 +24,9 @@ fake: Faker = Faker(['it_IT', 'en_US', 'ja_JP', 'de_DE', 'fr_FR'])
 
 def wait_when_all_tables_available(timeout_min: int = 2):
     """Wait when all tables is available."""
+    print(settings.auth_db_connect_data)
     with psycopg2.connect(
-        **settings.auth_db_connect_data()
+        **settings.auth_db_connect_data
     ) as pg_conn, pg_conn.cursor() as pg_cur:
         timeout = timeout_min * 60
         tables = (
@@ -37,7 +38,7 @@ def wait_when_all_tables_available(timeout_min: int = 2):
             try:
                 for table in tables:
                     pg_cur.execute(
-                        f'SELECT count(*) FROM {table}'
+                        f'SELECT count(*) FROM "{table}"'
                     )
             except Exception as e:
                 print(e)
@@ -48,10 +49,10 @@ def wait_when_all_tables_available(timeout_min: int = 2):
         raise Exception('Exception. Timeout. Waiting of tables.')
 
 
-def write_to_db(table_name: str, values: list):
+def write_to_db(table_name: str, values: list, conflict_by_id: bool = True):
     """Write data to the DB."""
     with psycopg2.connect(
-        **settings.auth_db_connect_data()
+        **settings.auth_db_connect_data
     ) as pg_conn, pg_conn.cursor() as pg_cur:
         fields: list = [k for k, v in values[0].dict().items()]
         items_in_request: str = ', '.join(
@@ -68,13 +69,19 @@ def write_to_db(table_name: str, values: list):
             ).decode() for item in args_list
         )
         fields_str: str = ', '.join(fields)
-        sql: str = f'INSERT INTO {table_name} ({fields_str}) VALUES {args}'
-        pg_cur.execute(sql)
+        sql: str = f'INSERT INTO "{table_name}" ({fields_str}) VALUES {args}'
+        if conflict_by_id:
+            sql += ' ON CONFLICT (id) DO NOTHING;'
+        try:
+            pg_cur.execute(sql)
+        except psycopg2.errors.UniqueViolation as e:
+            print(e)
 
 
 def data_getter(sql: str) -> Generator:
+    """Return data by sql request."""
     with psycopg2.connect(
-        **settings.auth_db_connect_data()
+        **settings.auth_db_connect_data
     ) as pg_conn, pg_conn.cursor() as pg_cur:
         # print(sql)
         pg_cur.execute(sql)
@@ -88,149 +95,79 @@ def data_getter(sql: str) -> Generator:
 
 
 def generate_roles() -> None:
-    pass
+    """Generate test roles."""
+    roles: list[models.Role] = [
+        models.Role(
+            id=str(uuid4()), name=f'Test role #{i}'
+        ) for i in range(settings.role_size)
+    ]
+    write_to_db(settings.auth_role_table_name, roles)
 
 
 def generate_users() -> None:
-    pass
-
-
-def generate_log_history():
-    pass
-
-
-def generate_genres() -> None:
-    """Generate fake genres."""
-    genres: list[models.Genre] = []
-    if len(genre_list) <= settings.genres_size:
-        end_item: int = len(genre_list)
-    else:
-        end_item = int(settings.genres_size)
-    for i in genre_list[:end_item]:
-        genres.append(
-            models.Genre(id=str(uuid4()), name=i, description=fake.text())
-        )
-    if genres:
-        write_to_db(settings.genre_table_name, genres)
-
-
-def generate_filmworks() -> None:
-    """Generate fake filmworks."""
-    i: int = 0
-    filmworks: list[models.Filmwork] = []
-    while i < settings.filmwork_size:
-        filmworks.append(
-            models.Filmwork(
-                id=str(uuid4()),
-                title=fake.sentence(nb_words=random.randint(2, 10)),
-                description=fake.text(),
-                creation_date=date(
-                    random.randint(1922, 2022),
-                    random.randint(1, 12),
-                    random.randint(1, 28)
-                ),
-                rating=random.uniform(1.1, 9.9),
-                type=random.choice(('film', 'tv show', 'serial'))
+    """Generate test users."""
+    users: list[models.User] = []
+    for i in range(settings.user_size):
+        first_name: str = fake.first_name()
+        last_name: str = fake.last_name()
+        email: str = f'{first_name}.{last_name}@{fake.domain_name()}'
+        user_id = str(uuid4())
+        users.append(
+            models.User(
+                id=user_id,
+                email=email,
+                name=f'{first_name} {last_name}',
+                password=generate_password_hash(first_name+last_name),
+                is_admin=False
             )
         )
-        if len(filmworks) >= settings.batch_size:
-            write_to_db(settings.filmwork_table_name, filmworks)
-            filmworks = []
-        i += 1
-    if filmworks:
-        write_to_db(settings.filmwork_table_name, filmworks)
+        generate_user_role(user_id)
+        generate_log_history(user_id)
+        if len(users) >= settings.batch_size:
+            write_to_db(settings.auth_user_table_name, users)
+            users = []
+    if users:
+        write_to_db(settings.user_table_name, users)
 
 
-def generate_persons() -> None:
-    """Generate fake persons."""
-    i: int = 0
-    persons: list[models.Person] = []
-    while i < settings.person_size:
-        persons.append(
-            models.Person(
-                id=str(uuid4()),
-                full_name=fake.name()
+def generate_user_role(user_id: str) -> None:
+    """Generate user-role connections."""
+    user_role: list[models.UserRole] = []
+    for data in data_getter(
+        f'SELECT id FROM "{settings.auth_role_table_name}"'
+    ):
+        for role in data:
+            user_role.append(
+                models.UserRole(
+                    user_id=user_id, role_id=role[0]
+                )
             )
-        )
-        if len(persons) >= settings.batch_size:
-            write_to_db(settings.person_table_name, persons)
-            persons = []
-        i += 1
-    if persons:
-        write_to_db(settings.person_table_name, persons)
-
-
-def generate_genre_filmwork() -> None:
-    """Generate relations between genre and filmwork."""
-    genre_filmworks: list[models.GenreFilmwork] = []
-    for data in data_getter(f'SELECT id FROM {settings.filmwork_table_name}'):
-        for film in data:
-            genres = [
-                i for i in data_getter(
-                    (
-                        f'SELECT id from {settings.genre_table_name} '
-                        f'ORDER BY RANDOM() LIMIT {random.randint(1, 5)}'
-                    )
-                )
-            ][0]
-            for genre in genres:
-                genre_filmworks.append(
-                    models.GenreFilmwork(
-                        id=str(uuid4()),
-                        film_work_id=film[0],
-                        genre_id=genre[0]
-                    )
-                )
-        write_to_db(settings.genre_filmwork_table_name, genre_filmworks)
-        genre_filmworks = []
-
-
-def generate_person_filmwork() -> None:
-    """Generate relations between person and filmwork."""
-    person_filmworks: list[models.PersonFilmwork] = []
-    for data in data_getter(f'SELECT id FROM {settings.filmwork_table_name}'):
-        for film in data:
-            director_size = random.randint(1, 3)
-            actor_size = random.randint(3, 10)
-            writer_size = random.randint(1, 3)
-            person_size = sum((director_size, actor_size, writer_size))
-
-            person_from_db = [
-                i for i in data_getter(
-                    (
-                        f'SELECT id FROM {settings.person_table_name} '
-                        f'ORDER BY RANDOM() LIMIT {person_size}'
-                    )
-                )
-            ][0]
-
-            director_ids = person_from_db[:director_size]
-            actor_ids = person_from_db[director_size:actor_size+director_size]
-            writer_ids = person_from_db[actor_size+director_size:]
-
-            # print(writer_ids)
-            person_sets: tuple = (
-                {'items': director_ids, 'type': 'director'},
-                {'items': actor_ids, 'type': 'actor'},
-                {'items': writer_ids, 'type': 'writer'}
-            )
-            for person_set in person_sets:
-                for person in person_set['items']:
-                    person_filmworks.append(
-                        models.PersonFilmwork(
-                            id=str(uuid4()),
-                            film_work_id=film[0],
-                            person_id=person[0],
-                            role=person_set['type']
-                        )
-                    )
-            if len(person_filmworks) >= settings.batch_size:
+            if len(user_role) >= settings.batch_size:
                 write_to_db(
-                    settings.person_filmwork_table_name, person_filmworks
+                    settings.auth_user_role_table_name, user_role, False
                 )
-                person_filmworks = []
-    if person_filmworks:
-        write_to_db(settings.person_filmwork_table_name, person_filmworks)
+    if user_role:
+        write_to_db(settings.auth_user_role_table_name, user_role, False)
+
+
+def generate_log_history(user_id: str) -> None:
+    """Generate test login history data."""
+    log_history: list[models.LogHistory] = []
+    cur = datetime.now()
+    for i in range(random.randint(1, settings.log_history)):
+        delta = timedelta(hours=random.randint(1, 100000))
+        timestamp = cur - delta
+        log_history.append(
+            models.LogHistory(
+                id=str(uuid4()),
+                user_id=user_id,
+                log_time=timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            )
+        )
+        if len(log_history) >= settings.batch_size:
+            write_to_db(settings.auth_log_history_table_name, log_history)
+    if log_history:
+        write_to_db(settings.auth_log_history, log_history)
 
 
 def main():
@@ -239,12 +176,8 @@ def main():
         wait_db.main()
         wait_when_all_tables_available()
 
-        generate_genres()
-        generate_persons()
-        generate_filmworks()
-
-        generate_genre_filmwork()
-        generate_person_filmwork()
+        generate_roles()
+        generate_users()
 
 
 if __name__ == '__main__':
