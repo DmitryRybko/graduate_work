@@ -107,6 +107,8 @@ services:
     container_name: final_watching_history_db
     image: mongo:6
     env_file: ./history_api/.env
+    ports:
+      - "27017:27017"
 
   fake_data:
     container_name: final_fake_data

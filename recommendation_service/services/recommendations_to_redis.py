@@ -1,12 +1,16 @@
 import redis
 import json
+from recommendation_service.utils.get_viewed_movies import get_viewed_movies
+
+from recommendation_service.config import settings
 
 # create a Redis client
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.Redis(settings.redis_host, settings.redis_port, settings.redis_db)
 
 # define the data to be saved
-user_id = '12345'
-uuids = ['a1b2c3', 'd4e5f6', 'g7h8i9']
+user_id = 'email2@emails.ru'
+uuids = get_viewed_movies(user_id)
+
 
 # convert the uuids list to a JSON-encoded string
 uuids_str = json.dumps(uuids)

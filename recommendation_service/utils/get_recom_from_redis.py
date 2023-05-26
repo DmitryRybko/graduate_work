@@ -1,15 +1,32 @@
 import redis
+from config import settings
 
-# create a Redis client
-r = redis.Redis(host='localhost', port=6379, db=0)
 
-# define the user_id to retrieve
-user_id = '12345'
+def retrieve_recom_movie_id(user_id):
+    # create a Redis client
+    if user_id == None:
+        uuids = ["some movie 1", "some movie 2"]
 
-# retrieve the uuids list from Redis
-uuids_str = r.get(user_id).decode('utf-8')
-uuids = eval(uuids_str)
+    else:
+        r = redis.Redis(settings.redis_host, settings.redis_port, settings.redis_db)
 
-# print the uuids list
-print(uuids)
-print(uuids[0])
+        try:
+            # retrieve the uuids list from Redis
+            uuids_str = r.get(user_id).decode('utf-8')
+            if uuids_str is None:
+                uuids = ["some movie 1", "some movie 2"]
+            else:
+                uuids = eval(uuids_str)
+        except (redis.exceptions.ResponseError, AttributeError):
+            uuids = ["some movie 1", "some movie 2"]
+
+    # return the uuids list
+    return uuids
+
+
+if __name__ == "__main__":
+    # example usage
+    user_id = '12345'
+    uuids = retrieve_recom_movie_id(user_id)
+    print(uuids)
+    print(uuids[0])
