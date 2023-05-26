@@ -16,4 +16,4 @@ COPY . .
 RUN chown -R appuser:appgroup "$PROJECT_DIR";
 USER appuser
 
-ENTRYPOINT ["python", "src/generate_fake_data_in_movies_db.py"]
+ENTRYPOINT ["sh", "src/entrypoint.sh"]

@@ -2,7 +2,9 @@
 """Main script to generate fake data in movies DB."""
 
 # default libs
+import logging
 import random
+import sys
 from datetime import date
 from time import sleep
 from typing import Generator
@@ -19,53 +21,54 @@ from settings import settings
 from utils import wait_db
 
 
+# log settings
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.ERROR)
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# faker settins
 fake: Faker = Faker(['it_IT', 'en_US', 'ja_JP', 'de_DE', 'fr_FR'])
 
 
 def wait_when_all_tables_available(timeout_min: int = 2):
     """Wait when all tables is available."""
+    logger.info('Wait when all tables are available')
+    timeout = timeout_min * 60
+    tables: tuple = (
+        settings.filmwork_table_name,
+        settings.genre_table_name,
+        settings.person_table_name,
+        settings.person_filmwork_table_name,
+        settings.genre_filmwork_table_name
+    )
     with psycopg2.connect(
-        dbname=settings.POSTGRES_DB,
-        user=settings.POSTGRES_USER,
-        password=settings.POSTGRES_PASSWORD,
-        host=settings.POSTGRES_HOST,
-        port=settings.POSTGRES_PORT
-    ) as pg_conn, pg_conn.cursor() as pg_cur:
-        timeout = timeout_min * 60
-        while timeout > 0:
-            try:
-                pg_cur.execute(
-                    f'SELECT count(*) FROM {settings.filmwork_table_name}'
-                )
-                pg_cur.execute(
-                    f'SELECT count(*) FROM {settings.genre_table_name}'
-                )
-                pg_cur.execute(
-                    f'SELECT count(*) FROM {settings.person_table_name}'
-                )
-                pg_cur.execute(
-                    (
-                        'SELECT count(*) FROM '
-                        f'{settings.person_filmwork_table_name}'
-                    )
-                )
-                pg_cur.execute(
-                    (
-                        'SELECT count(*) FROM '
-                        f'{settings.genre_filmwork_table_name}'
-                    )
-                )
-            except Exception as e:
-                print(e)
-                sleep(1)
-                timeout -= 1
-            else:
-                return
-        raise Exception('Exception. Timeout. Waiting of tables.')
+        **settings.movie_db_connect_data
+    ) as pg_conn:
+        pg_conn.set_session(autocommit=True)
+        with pg_conn.cursor() as pg_cur:
+            while timeout > 0:
+                for table in tables:
+                    try:
+                        pg_cur.execute(f'SELECT count(*) FROM {table}')
+                    except Exception as e:
+                        logger.error(e)
+                        sleep(1)
+                        timeout -= 1
+                    else:
+                        return
+            raise Exception('Exception. Timeout. Waiting of tables.')
 
 
 def write_to_db(table_name: str, values: list):
     """Write data to the DB."""
+    logger.info(f'Write data to DB; Table: {table_name}')
     with psycopg2.connect(
         dbname=settings.POSTGRES_DB,
         user=settings.POSTGRES_USER,
@@ -88,7 +91,11 @@ def write_to_db(table_name: str, values: list):
             ).decode() for item in args_list
         )
         fields_str: str = ', '.join(fields)
-        sql: str = f'INSERT INTO {table_name} ({fields_str}) VALUES {args}'
+        sql: str = (
+            f'INSERT INTO {table_name} ({fields_str}) VALUES {args} '
+            'ON CONFLICT (id) DO NOTHING'
+        )
+        logger.info(sql)
         pg_cur.execute(sql)
 
 
@@ -175,7 +182,9 @@ def generate_persons() -> None:
 def generate_genre_filmwork() -> None:
     """Generate relations between genre and filmwork."""
     genre_filmworks: list[models.GenreFilmwork] = []
-    for data in data_getter(f'SELECT id FROM {settings.filmwork_table_name}'):
+    for data in data_getter(
+        f'SELECT id FROM {settings.filmwork_table_name}'
+    ):
         for film in data:
             genres = [
                 i for i in data_getter(
