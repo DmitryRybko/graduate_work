@@ -59,12 +59,12 @@ class Settings(BaseSettings):
             'password': self.AUTH_POSTGRES_PASSWORD
         }
 
-    role_size: int = 100
-    user_size: int = 1000
-    log_history: int = 1000
+    role_size: int = 10
+    user_size: int = 100
+    log_history_size: int = 100
 
     # watching history
-    watching_history_size: int = 1000
+    watching_history_size: int = 100
 
     mongo_db_url: str = ''
     mongo_db_db_name: str = 'db'

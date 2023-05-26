@@ -2,7 +2,9 @@
 """Main script to generate fake data in movies DB."""
 
 # default libs
+import logging
 import random
+import sys
 from datetime import datetime, timedelta
 from time import sleep
 from typing import Generator
@@ -19,38 +21,56 @@ from settings import settings
 from utils import wait_db
 
 
-fake: Faker = Faker(['it_IT', 'en_US', 'ja_JP', 'de_DE', 'fr_FR'])
+# log settings
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# faker settings
+fake: Faker = Faker(['it_IT', 'en_US', 'de_DE', 'fr_FR'])
 
 
+# functions
 def wait_when_all_tables_available(timeout_min: int = 2):
-    """Wait when all tables is available."""
-    print(settings.auth_db_connect_data)
+    """Wait when all tables are available."""
+    logger.info('Waiting of all tables are available.')
+    logger.info(settings.auth_db_connect_data)
     with psycopg2.connect(
         **settings.auth_db_connect_data
-    ) as pg_conn, pg_conn.cursor() as pg_cur:
-        timeout = timeout_min * 60
-        tables = (
-            settings.auth_user_table_name,
-            settings.auth_role_table_name,
-            settings.auth_log_history_table_name
-        )
-        while timeout > 0:
-            try:
+    ) as pg_conn:
+        pg_conn.set_session(autocommit=True)
+        with pg_conn.cursor() as pg_cur:
+            timeout = timeout_min * 60
+            tables = (
+                settings.auth_user_table_name,
+                settings.auth_role_table_name,
+                settings.auth_log_history_table_name
+            )
+            while timeout > 0:
                 for table in tables:
-                    pg_cur.execute(
-                        f'SELECT count(*) FROM "{table}"'
-                    )
-            except Exception as e:
-                print(e)
-                sleep(1)
-                timeout -= 1
-            else:
-                return
-        raise Exception('Exception. Timeout. Waiting of tables.')
+                    try:
+                        sql: str = f'SELECT count(*) FROM "{table}"'
+                        logger.info(f'Run SQL: {sql}')
+                        pg_cur.execute(sql)
+                    except Exception as e:
+                        logger.error(e)
+                        sleep(2)
+                        timeout -= 2
+                    else:
+                        return
+            raise Exception('Exception. Timeout. Waiting of tables.')
 
 
 def write_to_db(table_name: str, values: list, conflict_by_id: bool = True):
     """Write data to the DB."""
+    logger.info('Write data to DB')
     with psycopg2.connect(
         **settings.auth_db_connect_data
     ) as pg_conn, pg_conn.cursor() as pg_cur:
@@ -73,13 +93,16 @@ def write_to_db(table_name: str, values: list, conflict_by_id: bool = True):
         if conflict_by_id:
             sql += ' ON CONFLICT (id) DO NOTHING;'
         try:
+            logger.info(f'Run SQL: {sql}')
             pg_cur.execute(sql)
         except psycopg2.errors.UniqueViolation as e:
-            print(e)
+            logger.error(e)
 
 
 def data_getter(sql: str) -> Generator:
     """Return data by sql request."""
+    logger.info('Data getter')
+    logger.info(f'SQL: {sql}')
     with psycopg2.connect(
         **settings.auth_db_connect_data
     ) as pg_conn, pg_conn.cursor() as pg_cur:
@@ -117,24 +140,37 @@ def generate_users() -> None:
                 id=user_id,
                 email=email,
                 name=f'{first_name} {last_name}',
-                password=generate_password_hash(first_name+last_name),
+                password=generate_password_hash(
+                    first_name+last_name, method='sha256'
+                ),
                 is_admin=False
             )
         )
-        generate_user_role(user_id)
-        generate_log_history(user_id)
         if len(users) >= settings.batch_size:
             write_to_db(settings.auth_user_table_name, users)
+            generate_user_role_and_log_history(users)
             users = []
+        logger.info(i)
     if users:
-        write_to_db(settings.user_table_name, users)
+        write_to_db(settings.auth_user_table_name, users)
+        generate_user_role_and_log_history(users)
+
+
+def generate_user_role_and_log_history(users: list[models.User]) -> None:
+    for user in users:
+        generate_user_role(user.id)
+        generate_log_history(user.id)
 
 
 def generate_user_role(user_id: str) -> None:
     """Generate user-role connections."""
     user_role: list[models.UserRole] = []
+    limit: int = random.randint(1, 2)
     for data in data_getter(
-        f'SELECT id FROM "{settings.auth_role_table_name}"'
+        (
+            f'SELECT id FROM "{settings.auth_role_table_name}" '
+            f'ORDER BY RANDOM() LIMIT {limit}'
+        )
     ):
         for role in data:
             user_role.append(
@@ -154,20 +190,23 @@ def generate_log_history(user_id: str) -> None:
     """Generate test login history data."""
     log_history: list[models.LogHistory] = []
     cur = datetime.now()
-    for i in range(random.randint(1, settings.log_history)):
-        delta = timedelta(hours=random.randint(1, 100000))
+    for i in range(random.randint(1, settings.log_history_size)):
+        delta = timedelta(hours=random.randint(1, 1000))
         timestamp = cur - delta
         log_history.append(
             models.LogHistory(
                 id=str(uuid4()),
                 user_id=user_id,
-                log_time=timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                # log_time=timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                log_time=timestamp
             )
         )
         if len(log_history) >= settings.batch_size:
-            write_to_db(settings.auth_log_history_table_name, log_history)
+            write_to_db(
+                settings.auth_log_history_table_name, log_history, False
+            )
     if log_history:
-        write_to_db(settings.auth_log_history, log_history)
+        write_to_db(settings.auth_log_history_table_name, log_history, False)
 
 
 def main():

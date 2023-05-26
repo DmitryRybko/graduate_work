@@ -78,7 +78,7 @@ class UserRole(BaseModel):
 
 class LogHistory(BaseModel):
     id: str
-    log_time: str
+    log_time: datetime
     user_id: str
 
 
