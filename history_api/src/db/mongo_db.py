@@ -26,22 +26,14 @@ class MondoDB(base_db.BaseDB):
         self, user_id: str
     ) -> list[WatchingHistory]:
         """Return user watching history."""
-        collection = self.db[user_id]
-        history = [d async for d in collection.find()]
+        collection = self.db[self.collection_name]
+        history = collection.find({'user_id': user_id}).sort([('$natural', -1)])
         return history
-
-    async def get_last_records_for_user(
-        self, user_id: str, limit: int = 1000
-    ) -> list[WatchingHistory]:
-        """Return the latest watching history items."""
-        collection = self.db[user_id]
-        history = collection.find({}).sort([('$natural', -1)]).limit(limit)
-        return [d async for d in history]
 
     async def add_history_record(self, user_id: str, film_id: str) -> None:
         """Add new watching history record."""
         collection = self.db[user_id]
-        r = await collection.find({'film_id': film_id})
+        r = await collection.find({'film_id': film_id, 'user_id': user_id})
         if r:
-            await collection.delete_one({'film_id': film_id})
-        await collection.insert_one({'film_id': film_id})
+            await collection.delete_one({'film_id': film_id, 'user_id': user_id})
+        await collection.insert_one({'film_id': film_id, 'user_id': user_id})

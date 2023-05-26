@@ -71,6 +71,7 @@ def main() -> None:
     logger.info(settings)
     client: AsyncIOMotorClient = AsyncIOMotorClient(settings.mongo_db_url)
     db = client[settings.mongo_db_db_name]
+    collection = db[settings.mongo_db_collection_name]
     film_list: list[dict] = []
     for user_id in user_getter():
         logger.info(user_id)
@@ -78,11 +79,11 @@ def main() -> None:
             random.randint(0, settings.watching_history_size)
         ):
             logger.info(f'User id: {user_id}; Film id: {film_id}')
-            film_list.append({'film_id': film_id})
+            film_list.append({'film_id': film_id, 'user_id': user_id})
             if len(film_list) >= settings.batch_size:
-                db[user_id].insert_many(film_list)
+                collection.insert_many(film_list)
         if film_list:
-            db[user_id].insert_many(film_list)
+            collection.insert_many(film_list)
 
 
 if __name__ == '__main__':

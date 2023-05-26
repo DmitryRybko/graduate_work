@@ -28,4 +28,4 @@ async def watching_history(
     print(history, type(history))
     if not history:
         logger.error(f'History list for user {user_id} is empty.')
-    return paginate(history)
+    return await paginate(history)

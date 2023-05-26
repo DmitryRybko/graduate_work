@@ -11,6 +11,7 @@ class BaseDB(abc.ABC):
         """Get records for a user by user_id."""
         pass
 
-    def get_last_1000_records_for_user(self, user_id: str):
-        """Get the latest 1000 records for a user by user_id."""
+    @abc.abstractmethod
+    def add_history_record(self, user_id: str, film_id: str):
+        """Create new record with user_id and film_id."""
         pass
