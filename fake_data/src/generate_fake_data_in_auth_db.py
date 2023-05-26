@@ -159,7 +159,7 @@ def generate_users() -> None:
 def generate_user_role_and_log_history(users: list[models.User]) -> None:
     for user in users:
         generate_user_role(user.id)
-        generate_log_history(user.id)
+        # generate_log_history(user.id)
 
 
 def generate_user_role(user_id: str) -> None:
