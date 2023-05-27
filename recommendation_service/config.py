@@ -1,6 +1,4 @@
 """Config module for FastAPI project."""
-import sys
-
 from dotenv import load_dotenv
 from loguru import logger
 from pydantic import BaseSettings

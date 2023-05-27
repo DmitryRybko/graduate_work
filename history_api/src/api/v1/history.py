@@ -1,6 +1,6 @@
 """Watching history API module."""
 
-from logging import getLogger
+from loguru import logger
 
 from fastapi import APIRouter, Depends
 
@@ -10,9 +10,6 @@ from models.history import WatchingHistory
 from services.history import (
     WatchingHistoryService, get_watching_history_service
 )
-
-
-logger = getLogger(__name__)
 
 router: APIRouter = APIRouter()
 
@@ -25,7 +22,6 @@ async def watching_history(
     """Return paginated watching history for a user."""
     logger.info(f'History for user: {user_id}')
     history: WatchingHistory = await srv.get_history_by_user_id(user_id)
-    print(history, type(history))
     if not history:
         logger.error(f'History list for user {user_id} is empty.')
     return paginate(history)

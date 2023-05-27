@@ -8,4 +8,4 @@ from pydantic import BaseModel
 class WatchingHistory(BaseModel):
     """Watching History model."""
 
-    film_id: UUID
+    film_id: str

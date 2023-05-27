@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-import logging
+from loguru import logger
 import random
-import sys
 from typing import Generator
 
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -10,19 +9,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import psycopg2
 
 from settings import settings
-
-
-# log settings
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 
 
 def data_getter(ps_connect_data: dict, sql: str) -> Generator:
