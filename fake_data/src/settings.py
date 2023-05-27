@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Settings module."""
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
@@ -39,7 +39,7 @@ class Settings(BaseSettings):
 
     # Auth settings
     AUTH_POSTGRES_HOST: str = 'auth'
-    AUTH_POSTGRES_PORT: str = '5432'
+    AUTH_POSTGRES_PORT: str = '54321'
     AUTH_POSTGRES_USER: str = 'app'
     AUTH_POSTGRES_PASSWORD: str = '123qwe'
     AUTH_POSTGRES_DB: str = 'auth'
@@ -72,3 +72,32 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+class LocalSettings(Settings):
+    """Local config."""
+
+    mongo_db_url: str = Field(default='localhost:27017', env='MONGO_DB_URL_LOCAL')
+    AUTH_POSTGRES_HOST: str = 'localhost'
+    AUTH_POSTGRES_PORT: str = '54321'
+
+class DockerSettings(Settings):
+    """Docker config."""
+
+    mongo_db_url: str = Field(default='watching_history_db', env='MONGO_DB_URL_DOCKER')
+
+
+def get_config(mode: str) -> Settings:
+    """Get config based on mode."""
+    if mode == 'local':
+        return LocalSettings()
+    elif mode == 'docker':
+        return DockerSettings()
+    else:
+        raise ValueError(f'Invalid mode: {mode}')
+
+
+mode = 'local'
+# mode = 'docker'
+
+settings = get_config(mode)

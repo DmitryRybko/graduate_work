@@ -43,4 +43,5 @@ if __name__ == '__main__':
         'main:app',
         host='0.0.0.0',
         port=int(config.port_to_run),
+        log_level="debug"
     )

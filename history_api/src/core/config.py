@@ -1,5 +1,7 @@
+from loguru import logger
 from pydantic import BaseSettings, Field
 
+logger.level("DEBUG")
 
 class Config(BaseSettings):
     """Base config."""
@@ -9,7 +11,7 @@ class Config(BaseSettings):
 
     mongo_db_url: str = ''
     mongo_db_db_name: str = 'db'
-    mongo_db_collection_name: str = 'collection'
+    mongo_db_collection_name: str = 'email2@emails.ru'
 
 
 class LocalConfig(Config):
@@ -27,8 +29,10 @@ class DockerConfig(Config):
 def get_config(mode: str) -> Config:
     """Get config based on mode."""
     if mode == 'local':
+        logger.info("local mode")
         return LocalConfig()
     elif mode == 'docker':
+        logger.info("docker mode")
         return DockerConfig()
     else:
         raise ValueError(f'Invalid mode: {mode}')
