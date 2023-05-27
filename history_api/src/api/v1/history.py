@@ -24,4 +24,4 @@ async def watching_history(
     history: WatchingHistory = await srv.get_history_by_user_id(user_id)
     if not history:
         logger.error(f'History list for user {user_id} is empty.')
-    return paginate(history)
+    return await paginate(history)
