@@ -54,7 +54,30 @@ def most_frequent_genre(genres):
     return most_frequent
 
 
+def get_recommended_movies(genre):
+    url = "http://localhost:8001/api/v1/films/get_recommendations"
+    data = {"genre": genre}
+
+    response = requests.post(url, json=data)
+
+    if response.status_code == 200:
+        logger.debug(f"{response}")
+        logger.debug(f"{response.json()}")
+        return response.json()
+    else:
+        return "Error: " + str(response.status_code)
+
+
+def get_recommendations(user_id):
+    viewed_movies = get_viewed_movies(user_id)
+    user_genres = get_genres_for_movies(viewed_movies)
+    user_top_genre = most_frequent_genre(user_genres)
+    recommended_movies = get_recommended_movies(user_top_genre)
+    return recommended_movies
+
+
 if __name__ == '__main__':
     viewed_movies = get_viewed_movies("email2@emails.ru")
     user_genres = get_genres_for_movies(viewed_movies)
     user_top_genre = most_frequent_genre(user_genres)
+    recommended_movies = get_recommended_movies(user_top_genre)
