@@ -28,6 +28,7 @@ class MondoDB(base_db.BaseDB):
         """Return user watching history."""
         collection = self.db[self.collection_name]
         history = collection.find({'user_id': user_id}).sort([('$natural', -1)])
+        logger.info("loading history")
         return history
 
     async def add_history_record(self, user_id: str, film_id: str) -> None:

@@ -33,7 +33,7 @@ services:
   
   auth_db:
     container_name: final_auth_postgres
-    image: postgres:13
+    image: postgres:13.4
     restart: always
     volumes:
       - auth_db:/var/lib/postgresql/data
@@ -83,7 +83,7 @@ services:
     volumes:
       - movies_db:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     env_file: ./.movies.env
   
   movies_admin:
@@ -99,15 +99,15 @@ services:
     env_file: ./history_api/.env
     ports:
       - "8014:8014"
-    depends_on:
-      - "watching_history_db"
+#    depends_on:
+#      - "watching_history_db"
   
-  watching_history_db:
-    container_name: final_watching_history_db
-    image: mongo:6
-    env_file: ./history_api/.env
-    ports:
-      - "27017:27017"
+#  watching_history_db:
+#    container_name: final_watching_history_db
+#    image: mongo:6
+#    env_file: ./history_api/.env
+#    ports:
+#      - "27017:27017"
 
   fake_data:
     container_name: final_fake_data

@@ -1,6 +1,6 @@
 import redis
 import json
-from recommendation_service.utils.get_viewed_movies import get_viewed_movies
+from recommendation_service.utils.get_recommendations import get_viewed_movies
 
 from recommendation_service.config import settings
 
