@@ -9,7 +9,7 @@ from api.v1.schemas import RecommendationsResponse
 # IDE will show error here but its not
 from config import settings
 from services.jwt_decode import decode_jwt
-from utils.get_recom_from_redis import retrieve_recom_movie_id
+from utils.get_recom_from_redis import retrieve_recom_movies
 
 # load_dotenv здесь нужен несмотря на наличие pydantic (при запуске не из docker),
 # так как pydantic не умеет искать env в parent директориях
@@ -29,5 +29,6 @@ def get_recommendations(request: Request, response: Response):
         user_email = None
         logger.info(f"user not logged in")
 
-    movie_id_recom = retrieve_recom_movie_id(user_email)
-    return RecommendationsResponse(movies_id=movie_id_recom)
+    movies_recom = retrieve_recom_movies(user_email)
+    logger.debug(movies_recom)
+    return RecommendationsResponse(movies_data=movies_recom)
