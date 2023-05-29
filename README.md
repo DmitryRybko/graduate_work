@@ -16,3 +16,4 @@ git clone git@github.com:DmitryRybko/Auth_sprint_2.git; # async service and auth
 docker-compose up -d --build;
 ```
 # Общая схема проекта
+![](recommendations_service.jpg)
