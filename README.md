@@ -15,3 +15,4 @@ git clone git@github.com:DmitryRybko/new_admin_panel_sprint_3.git; # ETL and adm
 git clone git@github.com:DmitryRybko/Auth_sprint_2.git; # async service and auth service
 docker-compose up -d --build;
 ```
+# Общая схема проекта
