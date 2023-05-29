@@ -1,10 +1,12 @@
 import requests
 from loguru import logger
 
+from config import settings
+
 
 def get_viewed_movies(user_id):
     logger.debug(f"getting views data for user {user_id}")
-    url = f"http://localhost:8014/api/v1/history/get/{user_id}"
+    url = f"{settings.get_warching_history_url}/{user_id}"
     response = requests.get(url)
 
     if response.status_code == 200:
@@ -18,9 +20,9 @@ def get_viewed_movies(user_id):
 
 
 def get_genres_for_movies(movies: list):
-    logger.debug(f"getting genre data for movies")
+    logger.debug("getting genre data for movies")
 
-    url = "http://localhost:8001/api/v1/films/get_genres"
+    url = settings.get_genres_url
     data = {"movies": movies}
 
     response = requests.post(url, json=data)
@@ -55,7 +57,7 @@ def most_frequent_genre(genres):
 
 
 def get_recommended_movies(genre):
-    url = "http://localhost:8001/api/v1/films/get_recommendations"
+    url = settings.get_recommendations_url
     data = {"genre": genre}
 
     response = requests.post(url, json=data)
