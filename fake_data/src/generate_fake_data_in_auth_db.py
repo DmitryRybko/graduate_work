@@ -40,7 +40,7 @@ fake: Faker = Faker(['it_IT', 'en_US', 'de_DE', 'fr_FR'])
 # functions
 def wait_when_all_tables_available(timeout_min: int = 2):
     """Wait when all tables are available."""
-    logger.info('Waiting of all tables are available.')
+    logger.info('Waiting for all tables to be available.')
     logger.info(settings.auth_db_connect_data)
     with psycopg2.connect(
         **settings.auth_db_connect_data

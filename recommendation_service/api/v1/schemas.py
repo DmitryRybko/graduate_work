@@ -2,5 +2,5 @@ from pydantic import BaseModel
 
 
 class RecommendationsResponse(BaseModel):
-    movies_id: list
+    movies_data: dict[str, dict]
 

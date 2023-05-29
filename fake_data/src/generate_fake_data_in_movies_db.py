@@ -37,7 +37,7 @@ logger.addHandler(handler)
 fake: Faker = Faker(['it_IT', 'en_US', 'ja_JP', 'de_DE', 'fr_FR'])
 
 
-def wait_when_all_tables_available(timeout_min: int = 2):
+def wait_when_all_tables_available(timeout_min: int = 1):
     """Wait when all tables is available."""
     logger.info('Wait when all tables are available')
     timeout = timeout_min * 60

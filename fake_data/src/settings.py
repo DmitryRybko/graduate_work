@@ -7,8 +7,8 @@ from pydantic import BaseSettings, Field
 class Settings(BaseSettings):
     """Settings class for the app."""
 
-    POSTGRES_HOST: str = 'movies_db'
-    POSTGRES_PORT: str = '5432'
+    POSTGRES_HOST: str = 'final_movies_db'
+    POSTGRES_PORT: str = '5433'
     POSTGRES_USER: str = 'app'
     POSTGRES_PASSWORD: str = '123qwe'
     POSTGRES_DB: str = 'movies_database'
@@ -38,8 +38,8 @@ class Settings(BaseSettings):
     debug: bool = True
 
     # Auth settings
-    AUTH_POSTGRES_HOST: str = 'auth'
-    AUTH_POSTGRES_PORT: str = '54321'
+    AUTH_POSTGRES_HOST: str = 'final_auth_postgres'
+    AUTH_POSTGRES_PORT: str = '5432'
     AUTH_POSTGRES_USER: str = 'app'
     AUTH_POSTGRES_PASSWORD: str = '123qwe'
     AUTH_POSTGRES_DB: str = 'auth'
@@ -66,9 +66,9 @@ class Settings(BaseSettings):
     # watching history
     watching_history_size: int = 100
 
-    mongo_db_url: str = ''
-    mongo_db_db_name: str = 'db'
-    mongo_db_collection_name: str = 'collection'
+    mongo_db_url: str = 'localhost'
+    mongo_db_db_name: str = 'watching_history'
+    mongo_db_collection_name: str = 'user_history'
 
 
 settings = Settings()
@@ -78,8 +78,7 @@ class LocalSettings(Settings):
     """Local config."""
 
     mongo_db_url: str = Field(default='localhost:27017', env='MONGO_DB_URL_LOCAL')
-    AUTH_POSTGRES_HOST: str = 'localhost'
-    AUTH_POSTGRES_PORT: str = '54321'
+
 
 class DockerSettings(Settings):
     """Docker config."""
@@ -97,7 +96,7 @@ def get_config(mode: str) -> Settings:
         raise ValueError(f'Invalid mode: {mode}')
 
 
-mode = 'local'
-# mode = 'docker'
+# mode = 'local'
+mode = 'docker'
 
 settings = get_config(mode)
