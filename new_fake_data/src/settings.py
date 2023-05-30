@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     # Movies
     movies_db_url: str = 'postgres://app:123qwe@movies_db:5432/movies_db'
-    schema_name: str = 'content'
+    movies_schema_name: str = 'content'
     filmwork_table_name: str = 'film_work'
     genre_table_name: str = 'genre'
     person_table_name: str = 'person'

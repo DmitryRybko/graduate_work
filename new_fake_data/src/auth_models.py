@@ -20,10 +20,10 @@ user_role = Table(
     settings.user_role_table_name,
     Base.metadata,
     Column(
-        'user_id', UUID(as_uuid=True), ForeignKey('user.id', ondelete='CASCADE')
+        'user_id', UUID(as_uuid=True), ForeignKey(f'{settings.user_table_name}.id', ondelete='CASCADE')
     ),
     Column(
-        'role_id', UUID(as_uuid=True), ForeignKey('role.id', ondelete='CASCADE')
+        'role_id', UUID(as_uuid=True), ForeignKey(f'{settings.role_table_name}.id', ondelete='CASCADE')
     )
 )
 
@@ -39,7 +39,7 @@ class LogHistory(Base):
         nullable=False
     )
     log_time = Column(DateTime(timezone=True), server_default=func.now())
-    user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'))
+    user_id = Column(UUID(as_uuid=True), ForeignKey(f'{settings.user_table_name}.id'))
 
 
 class Role(Base):
