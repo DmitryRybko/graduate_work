@@ -5,16 +5,18 @@ from recommendation_service.utils.get_recommendations import get_recommendations
 from recommendation_service.config import settings
 
 
-def save_recommendations_for_users():
+def save_recommendations_for_users() -> None:
     # create a Redis client
-    r = redis.Redis(settings.redis_host, settings.redis_port, settings.redis_db)
+    r: redis.Redis = redis.Redis(
+        settings.redis_host, settings.redis_port, settings.redis_db
+    )
 
     # define the data to be saved
-    user_id = 'email2@emails.ru'
-    movies = get_recommendations(user_id)
+    user_id: str = 'email2@emails.ru'
+    movies: dict | None = get_recommendations(user_id)
 
     # convert the uuids list to a JSON-encoded string
-    movies_str = json.dumps(movies)
+    movies_str: str = json.dumps(movies)
 
     # save the data to Redis
     r.set(user_id, movies_str)

@@ -1,15 +1,19 @@
 import requests
+from http import HTTPStatus
 from loguru import logger
 
+from config import settings
 
-def get_viewed_movies(user_id):
+
+def get_viewed_movies(user_id: str) -> list | None:
+    """Return list of user's viewed films."""
     logger.debug(f"getting views data for user {user_id}")
-    url = f"http://localhost:8014/api/v1/history/get/{user_id}"
+    url: str = f"{settings.get_watching_history_url}/{user_id}"
     response = requests.get(url)
 
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         data = response.json()
-        movies_list = data[user_id]
+        movies_list: list | None = data[user_id]
         logger.debug(f"data received: {data}")
     else:
         logger.error("Error: Failed to retrieve data from API")
@@ -17,15 +21,16 @@ def get_viewed_movies(user_id):
     return movies_list
 
 
-def get_genres_for_movies(movies: list):
+def get_genres_for_movies(movies: list) -> list | None:
+    """Return list of genres for movies list."""
     logger.debug(f"getting genre data for movies")
 
-    url = "http://localhost:8001/api/v1/films/get_genres"
-    data = {"movies": movies}
+    url: str = settings.get_genres_url
+    data: dict = {"movies": movies}
 
     response = requests.post(url, json=data)
 
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         response_data = response.json()
         logger.debug(f"{response_data}")
         genres_list = response_data["genre_ids"]
@@ -34,7 +39,8 @@ def get_genres_for_movies(movies: list):
         logger.debug("Error: ", response.status_code)
 
 
-def most_frequent_genre(genres):
+def most_frequent_genre(genres: list) -> str | None:
+    """Return the most frequent genre."""
     # Create a dictionary to store the frequency of each genre
     genre_freq = {}
     for genre in genres:
@@ -54,13 +60,14 @@ def most_frequent_genre(genres):
     return most_frequent
 
 
-def get_recommended_movies(genre):
-    url = "http://localhost:8001/api/v1/films/get_recommendations"
-    data = {"genre": genre}
+def get_recommended_movies(genre: str) -> dict | str:
+    """Return recommended movies by genre name."""
+    url: str = settings.get_recommendations_url
+    data: dict = {"genre": genre}
 
     response = requests.post(url, json=data)
 
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         logger.debug(f"{response}")
         logger.debug(f"{response.json()}")
         return response.json()
@@ -68,11 +75,18 @@ def get_recommended_movies(genre):
         return "Error: " + str(response.status_code)
 
 
-def get_recommendations(user_id):
-    viewed_movies = get_viewed_movies(user_id)
+def get_recommendations(user_id: str) -> dict | None:
+    """Return recommended films for a user."""
+    viewed_movies: list | None = get_viewed_movies(user_id)
+    if viewed_movies is None:
+        return None
     user_genres = get_genres_for_movies(viewed_movies)
+    if user_genres is None:
+        return None
     user_top_genre = most_frequent_genre(user_genres)
-    recommended_movies = get_recommended_movies(user_top_genre)
+    if user_top_genre is None:
+        return None
+    recommended_movies: dict | None = get_recommended_movies(user_top_genre)
     return recommended_movies
 
 
