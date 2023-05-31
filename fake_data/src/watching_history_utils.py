@@ -11,6 +11,7 @@ from settings import settings
 
 
 def generate_watching_history(auth_session, movies_session) -> None:
+    """Generate watching history for all users."""
     client: AsyncIOMotorClient = AsyncIOMotorClient(settings.mongo_db_url)
     db = client[settings.mongo_db_db_name]
     collection = db[settings.mongo_db_collection_name]
@@ -25,5 +26,6 @@ def generate_watching_history(auth_session, movies_session) -> None:
             film_list.append({'film_id': film_work.id, 'user_id': user.id})
             if len(film_list) >= settings.batch_size:
                 collection.insert_many(film_list)
+                film_list = []
     if film_list:
         collection.insert_many(film_list)
