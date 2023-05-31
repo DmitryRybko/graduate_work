@@ -39,7 +39,10 @@ class GenreFilmWork(Base):
     film_work_id = Column(
         UUID(as_uuid=True),
         ForeignKey(
-            f'{settings.movies_schema_name}.{settings.film_work_table_name}.id',
+            (
+                f'{settings.movies_schema_name}.'
+                f'{settings.film_work_table_name}.id'
+            ),
             ondelete='CASCADE'
         )
     )
@@ -59,11 +62,20 @@ class PersonFilmWork(Base):
     )
     person_id = Column(
         UUID(as_uuid=True),
-        ForeignKey(f'{settings.movies_schema_name}.{settings.film_work_table_name}.id', ondelete='CASCADE')
+        ForeignKey(
+            (
+                f'{settings.movies_schema_name}.'
+                f'{settings.film_work_table_name}.id'
+            ),
+            ondelete='CASCADE'
+        )
     )
     film_work_id = Column(
         UUID(as_uuid=True),
-        ForeignKey(f'{settings.movies_schema_name}.{settings.genre_table_name}.id', ondelete='CASCADE')
+        ForeignKey(
+            f'{settings.movies_schema_name}.{settings.genre_table_name}.id',
+            ondelete='CASCADE'
+        )
     )
     role = Column(String),
     created = Column(DateTime(timezone=True), default=datetime.now())

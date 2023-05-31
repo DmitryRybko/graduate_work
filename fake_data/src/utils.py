@@ -1,44 +1,25 @@
 """Utils module."""
 
-import logging
-import sys
 from time import sleep
 
-from settings import settings
+from logger import get_logger
 
 
-def set_log_level() -> None:
-    """Set log level."""
-    if settings.log_level == 'ERROR':
-        log_level = logging.ERROR
-    elif settings.log_level == 'DEBUG':
-        log_level = logging.DEBUG
-    else:
-        log_level = logging.CRITICAL
-
-    # log settings
-    logger = logging.getLogger(__name__)
-    logger.setLevel(log_level)
-
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(log_level)
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-
-def wait_db(engine, tables: tuple, timeout_min: int = 2):
+def wait_db(
+    engine, tables: tuple, schema: str = 'public', timeout_min: int = 2
+):
     """Wait when all db and all tables are available."""
+    logger = get_logger()
+    logger.debug(f'Engine: {engine}; Tables: {tables}; Timeout: {timeout_min}')
     timeout = timeout_min * 60
-    while timeout:
-        for table in tables:
-            if not engine.dialect.has_table(engine, table):
-                sleep(2)
-                timeout -= 2
-            else:
-                return
-    print(f'Engine: {engine}')
-    print(f'Tables: {tables}')
-    raise Exception('Timeout of waiting DB.')
+    for table in tables:
+        while True:
+            logger.debug(f'Table to wait {table}')
+            if engine.dialect.has_table(engine, table, schema=schema):
+                logger.debug(f'Table {table} is available')
+                break
+            sleep(2)
+            timeout -= 2
+
+            if timeout <= 0:
+                raise Exception('Timeout of waiting DB.')
