@@ -1,14 +1,15 @@
-import redis
-import json
 import datetime
-from recommendation_service.utils.get_recommendations import get_recommendations
-from recommendation_service.config import settings
+import json
+
+from fastapi import Depends
+
+import redis
+
+from db.redis import get_redis
+from utils.get_recommendations import get_recommendations
 
 
-def save_recommendations_for_users():
-    # create a Redis client
-    r = redis.Redis(settings.redis_host, settings.redis_port, settings.redis_db)
-
+def save_recommendations_for_users(r: redis.Redis | None = Depends(get_redis)):
     # define the data to be saved
     user_id = 'email2@emails.ru'
     movies = get_recommendations(user_id)
@@ -17,7 +18,10 @@ def save_recommendations_for_users():
     movies_str = json.dumps(movies)
 
     # save the data to Redis
-    r.set(user_id, movies_str)
+    if r:
+        r.set(user_id, movies_str)
+    else:
+        raise Exception('Redis is not available')
 
 
 # set up a weekly timer to run the function
