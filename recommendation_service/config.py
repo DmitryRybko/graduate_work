@@ -6,7 +6,6 @@ from pydantic import BaseSettings
 # load_dotenv здесь нужен несмотря на наличие pydantic,
 # так как pydantic не умеет искать env в parent директориях
 load_dotenv()
-logger.level("DEBUG")
 
 
 class Settings(BaseSettings):
@@ -29,6 +28,8 @@ class Settings(BaseSettings):
     @property
     def get_recommendations_url(self):
         return f"{self.movies_api_url}/api/v1/films/get_recommendations"
+    
+    log_level: str = "ERROR"
 
     class Config:
         case_sensitive = False
@@ -37,3 +38,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+logger.level(settings.log_level)
