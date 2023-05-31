@@ -1,0 +1,3 @@
+auth_db_url='postgresql://app:123qwe@auth_db:5432/auth'
+movies_db_url='postgres://app:123qwe@movies_db:5432/movies_database'
+mongo_db_url='watching_history_db'
