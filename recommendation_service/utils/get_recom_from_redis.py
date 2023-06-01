@@ -1,6 +1,8 @@
-"""Get recomendations from redis module."""
 
-from fastapi import Depends
+import json
+
+import redis
+from recommendation_service.config import settings
 from loguru import logger
 
 import redis
@@ -21,7 +23,7 @@ def retrieve_recom_movies(
             if movies_str is None:
                 movies = ["some movie 1", "some movie 2"]
             else:
-                movies = eval(movies_str)
+                movies = json.loads(movies_str)
         except (redis.exceptions.ResponseError, AttributeError):
             movies = ["some movie 1", "some movie 2"]
 
