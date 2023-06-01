@@ -11,9 +11,7 @@ from config import settings
 from services.jwt_decode import decode_jwt
 from utils.get_recom_from_redis import retrieve_recom_movies
 
-# load_dotenv здесь нужен несмотря на наличие pydantic (при запуске не из docker),
-# так как pydantic не умеет искать env в parent директориях
-load_dotenv()
+logger.add("debug.log", level=settings.log_level)
 
 router = APIRouter()
 
