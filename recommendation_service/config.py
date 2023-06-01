@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     @property
     def get_watching_history_url(self):
-        return f"{self.watchin_history_api_url}/api/v1/history/get"
+        return f"{self.watching_history_api_url}/api/v1/history/get"
 
     @property
     def get_recommendations_url(self):
