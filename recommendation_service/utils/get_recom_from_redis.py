@@ -7,7 +7,6 @@ import redis
 
 from db.redis import get_redis
 
-
 def retrieve_recom_movies(
     user_id: str, r: redis.Redis | None = Depends(get_redis)
 ):

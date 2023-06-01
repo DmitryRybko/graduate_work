@@ -11,11 +11,13 @@ from utils.get_recommendations import get_recommendations
 
 def save_recommendations_for_users(r: redis.Redis | None = Depends(get_redis)):
     # define the data to be saved
-    user_id = 'email2@emails.ru'
-    movies = get_recommendations(user_id)
+
+    user_id: str = 'email2@emails.ru'
+    movies: dict | None = get_recommendations(user_id)
+
 
     # convert the uuids list to a JSON-encoded string
-    movies_str = json.dumps(movies)
+    movies_str: str = json.dumps(movies)
 
     # save the data to Redis
     if r:
