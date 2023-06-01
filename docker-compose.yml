@@ -38,7 +38,7 @@ services:
     volumes:
       - auth_db:/var/lib/postgresql/data
     ports:
-      - "54321:54321"
+      - "54322:5432"
     env_file: ./.auth.env
 
   api_service:
@@ -83,7 +83,7 @@ services:
     volumes:
       - movies_db:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "54321:5432"
     env_file: ./.movies.env
   
   movies_admin:
@@ -99,23 +99,23 @@ services:
     env_file: ./history_api/.env
     ports:
       - "8014:8014"
-#    depends_on:
-#      - "watching_history_db"
-  
-#  watching_history_db:
-#    container_name: final_watching_history_db
-#    image: mongo:6
-#    env_file: ./history_api/.env
-#    ports:
-#      - "27017:27017"
-
-  fake_data:
-    container_name: final_fake_data
-    build: ./fake_data
-    env_file: ./fake_data/.env
     depends_on:
-      - "movies_db"
-      - "movies_admin"
+      - "watching_history_db"
+
+  watching_history_db:
+    container_name: final_watching_history_db
+    image: mongo:6
+    env_file: ./history_api/.env
+    ports:
+      - "27017:27017"
+
+  # fake_data:
+  #   container_name: final_fake_data
+  #   build: ./fake_data
+  #   env_file: ./fake_data/.env
+  #   depends_on:
+  #     - "movies_db"
+  #     - "movies_admin"
 
   recommendations_redis:
     container_name: recommendations_redis
@@ -123,6 +123,20 @@ services:
     restart: always
     ports:
       - "6379:6379"
+  
+  recommendations:
+    container_name: final_recommendation
+    build: ./recommendation_service
+    env_file: ./recommendation_service/.env 
+    depends:
+      - "recommendations_redis"
+      - "recommendations_huey"
+  
+  recommendations_huey:
+    container_name: final_recommendation_huey
+    build: ./recommendation_service
+    env_file: ./recommendation_service/.env
+    command: huey_consumer.py main.huey -w2
 
 
 volumes:
