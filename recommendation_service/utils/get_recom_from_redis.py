@@ -2,12 +2,14 @@
 import json
 
 import redis
+from fastapi import Depends
 from recommendation_service.config import settings
 from loguru import logger
 
 import redis
 
 from db.redis import get_redis
+
 
 def retrieve_recom_movies(
     user_id: str, r: redis.Redis | None = Depends(get_redis)

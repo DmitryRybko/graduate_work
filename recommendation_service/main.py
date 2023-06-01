@@ -26,7 +26,7 @@ async def startup():
     It connects to redis and elasticsearch in event-loop.
     """
     redis.redis = aioredis.from_url(
-        f'redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}',
+        f'redis://{settings.redis_host}:{settings.redis_port}',
         encoding='utf8',
         decode_responses=True
     )

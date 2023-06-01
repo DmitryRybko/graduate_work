@@ -3,13 +3,10 @@ from fastapi import APIRouter, Response, Request
 from starlette import status
 from loguru import logger
 
-from api.v1.schemas import RecommendationsResponse
-
-# since relative imports work from file that is run,
-# IDE will show error here but its not
-from config import settings
-from services.jwt_decode import decode_jwt
-from utils.get_recom_from_redis import retrieve_recom_movies
+from recommendation_service.api.v1.schemas import RecommendationsResponse
+from recommendation_service.config import settings
+from recommendation_service.services.jwt_decode import decode_jwt
+from recommendation_service.utils.get_recom_from_redis import retrieve_recom_movies
 
 logger.add("debug.log", level=settings.log_level)
 
