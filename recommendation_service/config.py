@@ -1,9 +1,5 @@
 """Config module for FastAPI project."""
-from loguru import logger
 from pydantic import BaseSettings
-
-
-logger.level("DEBUG")
 
 
 class Settings(BaseSettings):
@@ -27,7 +23,7 @@ class Settings(BaseSettings):
     def get_recommendations_url(self):
         return f"{self.movies_api_url}/api/v1/films/get_recommendations"
     
-    log_level: str = "ERROR"
+    log_level: str = "DEBUG"
 
     class Config:
         case_sensitive = False
