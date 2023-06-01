@@ -37,4 +37,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-logger.level(settings.log_level)
+
