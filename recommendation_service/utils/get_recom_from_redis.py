@@ -1,18 +1,22 @@
+
 import json
 
 import redis
 from recommendation_service.config import settings
 from loguru import logger
 
+import redis
 
-def retrieve_recom_movies(user_id):
+from db.redis import get_redis
+
+def retrieve_recom_movies(
+    user_id: str, r: redis.Redis | None = Depends(get_redis)
+):
     # create a Redis client
-    if user_id == None:
+    if user_id is None:
         movies = ["some general movie 1", "some general movie 2"]
 
     else:
-        r = redis.Redis(settings.redis_host, settings.redis_port, settings.redis_db)
-
         try:
             # retrieve the uuids list from Redis
             movies_str = r.get(user_id).decode('utf-8')

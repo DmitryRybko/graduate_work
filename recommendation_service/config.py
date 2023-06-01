@@ -6,7 +6,6 @@ from pydantic import BaseSettings
 # load_dotenv здесь нужен несмотря на наличие pydantic,
 # так как pydantic не умеет искать env в parent директориях
 load_dotenv()
-logger.level("DEBUG")
 
 
 class Settings(BaseSettings):
@@ -15,6 +14,23 @@ class Settings(BaseSettings):
     redis_port: int = 6379
     redis_db: int = 0
 
+    movies_api_url: str = "http://localhost:8001"
+    watching_history_api_url: str = "http://localhost:8014"
+
+    @property
+    def get_genres_url(self):
+        return f"{self.movies_api_url}/api/v1/films/get_genres"
+
+    @property
+    def get_watching_history_url(self):
+        return f"{self.watchin_history_api_url}/api/v1/history/get"
+
+    @property
+    def get_recommendations_url(self):
+        return f"{self.movies_api_url}/api/v1/films/get_recommendations"
+    
+    log_level: str = "ERROR"
+
     class Config:
         case_sensitive = False
         env_file = ".recom.env"
@@ -22,3 +38,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+logger.level(settings.log_level)
