@@ -1,19 +1,20 @@
-import redis
-from recommendation_service.config import settings
+"""Get recomendations from redis module."""
+
+from fastapi import Depends
 from loguru import logger
 
+import redis
 
-def retrieve_recom_movies(user_id: str | None) -> list:
-    """Return recommended films from redis."""
+from db.redis import get_redis
+
+def retrieve_recom_movies(
+    user_id: str, r: redis.Redis | None = Depends(get_redis)
+):
     # create a Redis client
-    if user_id == None:
-        movies: list = ["some general movie 1", "some general movie 2"]
+    if user_id is None:
+        movies = ["some general movie 1", "some general movie 2"]
 
     else:
-        r:redis.Redis = redis.Redis(
-            settings.redis_host, settings.redis_port, settings.redis_db
-        )
-
         try:
             # retrieve the uuids list from Redis
             movies_str = r.get(user_id).decode('utf-8')
@@ -33,4 +34,3 @@ if __name__ == "__main__":
     user_id = "email2@emails.ru"
     movies = retrieve_recom_movies(user_id)
     logger.debug(f"movies got from Redis: {movies}")
-
