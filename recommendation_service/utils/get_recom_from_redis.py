@@ -3,13 +3,16 @@ from recommendation_service.config import settings
 from loguru import logger
 
 
-def retrieve_recom_movies(user_id):
+def retrieve_recom_movies(user_id: str | None) -> list:
+    """Return recommended films from redis."""
     # create a Redis client
     if user_id == None:
-        movies = ["some general movie 1", "some general movie 2"]
+        movies: list = ["some general movie 1", "some general movie 2"]
 
     else:
-        r = redis.Redis(settings.redis_host, settings.redis_port, settings.redis_db)
+        r:redis.Redis = redis.Redis(
+            settings.redis_host, settings.redis_port, settings.redis_db
+        )
 
         try:
             # retrieve the uuids list from Redis

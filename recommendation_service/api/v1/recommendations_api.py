@@ -19,11 +19,11 @@ router = APIRouter()
 
 
 @router.get("/", response_model=RecommendationsResponse)
-def get_recommendations(request: Request, response: Response):
+def get_recommendations(request: Request, response: Response) -> RecommendationsResponse:
     # в составе JWT токена приезжает user_id (email), который мы декодируем и используем для запроса в database
     try:
-        token = request.headers["Authorization"]
-        user_email = decode_jwt(token)
+        token: str = request.headers["Authorization"]
+        user_email: str | None = decode_jwt(token)
         logger.info(f"{user_email}")
     except KeyError:
         user_email = None
