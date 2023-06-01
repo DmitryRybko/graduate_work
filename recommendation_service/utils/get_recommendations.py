@@ -5,10 +5,13 @@ from loguru import logger
 from config import settings
 
 
+
 def get_viewed_movies(user_id: str) -> list | None:
     """Return list of user's viewed films."""
     logger.debug(f"getting views data for user {user_id}")
+
     url: str = f"{settings.get_watching_history_url}/{user_id}"
+
     response = requests.get(url)
 
     if response.status_code == HTTPStatus.OK:
@@ -27,6 +30,7 @@ def get_genres_for_movies(movies: list) -> list | None:
 
     url: str = settings.get_genres_url
     data: dict = {"movies": movies}
+
 
     response = requests.post(url, json=data)
 
@@ -64,6 +68,7 @@ def get_recommended_movies(genre: str) -> dict | str:
     """Return recommended movies by genre name."""
     url: str = settings.get_recommendations_url
     data: dict = {"genre": genre}
+
 
     response = requests.post(url, json=data)
 
