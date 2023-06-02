@@ -1,6 +1,6 @@
 from python:3.10-alpine
 
-EXPOSE 8014/tcp
+EXPOSE 8003/tcp
 
 ARG PROJECT_DIR=/project
 ENV PROJECT_DIR=/project
