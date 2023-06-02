@@ -9,13 +9,14 @@ from faker import Faker
 from sqlalchemy import func
 from sqlalchemy.orm import load_only
 
-from werkzeug.security import generate_password_hash
-
 from data.genres import genre_list
+from logger import get_logger
 from movies_models import (
     Genre, GenreFilmWork, FilmWork, Person, PersonFilmWork
 )
 from settings import settings
+
+logger = get_logger()
 
 
 director_role_name = 'director'
@@ -153,6 +154,8 @@ def generate_film_works(session) -> None:
 
 
 def generate_a_new_film_work(session) -> None:
+    """Generate one new film in DB."""
+    logger.debug('Gen new film_work')
     persons = get_persons_for_a_film_work(session)
 
     genres_from_db = session.query(Genre).options(load_only('id')).offset(
@@ -193,7 +196,7 @@ def generate_a_new_film_work(session) -> None:
                 film_work_id=film_work.id
             )
         )
-
+    logger.debug(film_work)
     session.commit()
     session.flush()
 

@@ -5,7 +5,7 @@ import sys
 
 from settings import settings
 
-logger: logging.Logger | None = None
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 def set_log_settings() -> logging.Logger:
