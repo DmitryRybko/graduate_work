@@ -15,7 +15,6 @@ def save_recommendations_for_users(r: redis.Redis | None = Depends(get_redis)):
     user_id: str = 'email2@emails.ru'
     movies: dict | None = get_recommendations(user_id)
 
-
     # convert the uuids list to a JSON-encoded string
     movies_str: str = json.dumps(movies)
 
