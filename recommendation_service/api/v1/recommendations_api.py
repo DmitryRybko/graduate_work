@@ -1,6 +1,4 @@
-from dotenv import load_dotenv
 from fastapi import APIRouter, Request, Depends
-from starlette import status
 from loguru import logger
 
 from recommendation_service.api.v1.schemas import RecommendationsResponse

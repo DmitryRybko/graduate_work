@@ -2,7 +2,7 @@ import requests
 from http import HTTPStatus
 from loguru import logger
 
-from config import settings
+from recommendation_service.config import settings
 
 
 
