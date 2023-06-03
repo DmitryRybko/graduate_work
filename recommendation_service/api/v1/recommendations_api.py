@@ -5,7 +5,7 @@ from loguru import logger
 
 from recommendation_service.api.v1.schemas import RecommendationsResponse
 from recommendation_service.config import settings
-from recommendation_service.services.jwt_decode import decode_jwt, ParseJWTToken
+from recommendation_service.services.jwt_decode import ParseJWTToken
 from recommendation_service.utils.get_recom_from_redis import retrieve_recom_movies
 
 logger.add("debug.log", level=settings.log_level)
