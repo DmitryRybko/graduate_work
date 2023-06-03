@@ -3,12 +3,10 @@ import json
 
 import redis
 from fastapi import Depends
-from recommendation_service.config import settings
 from loguru import logger
 
-import redis
-
-from db.redis import get_redis
+from recommendation_service.db.redis import get_redis
+from recommendation_service.services.recommendations_to_redis import save_recommendations_for_users
 
 
 def retrieve_recom_movies(
@@ -23,6 +21,7 @@ def retrieve_recom_movies(
             # retrieve the uuids list from Redis
             movies_str = r.get(user_id).decode('utf-8')
             if movies_str is None:
+                save_recommendations_for_users(user_id)
                 movies = ["some movie 1", "some movie 2"]
             else:
                 movies = json.loads(movies_str)

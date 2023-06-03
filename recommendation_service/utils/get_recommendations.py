@@ -5,7 +5,6 @@ from loguru import logger
 from recommendation_service.config import settings
 
 
-
 def get_viewed_movies(user_id: str) -> list | None:
     """Return list of user's viewed films."""
     logger.debug(f"getting views data for user {user_id}")
@@ -69,7 +68,6 @@ def get_recommended_movies(genre: str) -> dict | str:
     url: str = settings.get_recommendations_url
     data: dict = {"genre": genre}
 
-
     response = requests.post(url, json=data)
 
     if response.status_code == HTTPStatus.OK:
@@ -96,6 +94,7 @@ def get_recommendations(user_id: str) -> dict | None:
 
 
 if __name__ == '__main__':
+    # example usage
     viewed_movies = get_viewed_movies("email2@emails.ru")
     user_genres = get_genres_for_movies(viewed_movies)
     user_top_genre = most_frequent_genre(user_genres)
