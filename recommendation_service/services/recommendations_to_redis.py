@@ -5,8 +5,8 @@ from fastapi import Depends
 
 import redis
 
-from db.redis import get_redis
-from utils.get_recommendations import get_recommendations
+from recommendation_service.db.redis import get_redis
+from recommendation_service.utils.get_recommendations import get_recommendations
 
 
 def save_recommendations_for_users(r: redis.Redis | None = Depends(get_redis)):
