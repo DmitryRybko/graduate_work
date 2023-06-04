@@ -7,7 +7,7 @@ class BaseDB(abc.ABC):
     """Base class to work with DB."""
 
     @abc.abstractmethod
-    def get_history_for_user(self, user_id: str):
+    def get_history_for_user(self, user_id: str, limit: int):
         """Get records for a user by user_id."""
         pass
 

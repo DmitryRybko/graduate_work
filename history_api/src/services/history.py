@@ -6,6 +6,7 @@ from fastapi import Depends
 
 from db.base_db import BaseDB
 from db.db import get_db
+from models.history import WatchingHistory
 
 
 class WatchingHistoryService:
@@ -15,15 +16,25 @@ class WatchingHistoryService:
         """Init WatchingHistoryService."""
         self.db: BaseDB = db
 
-    async def get_history_by_user_id(self, user_id: str):
+    async def get_history_by_user_id(
+        self, user_id: str, limit: int = 1000
+    ) -> list[WatchingHistory]:
         """Return all user history."""
-        history = await self.db.get_history_for_user(user_id)
+        history: list[WatchingHistory] = await self.db.get_history_for_user(
+            user_id, limit
+        )
         return history
 
-    async def get_latest_user_history(self, user_id: str):
-        """Return the latest user history items."""
-        history = await self.db.get_latest_user_history(user_id)
-        return history
+    async def add_watched_film(self, user_id: str, film_id: str) -> str | None:
+        """Add new item in watching history."""
+        watched_film: WatchingHistory = WatchingHistory(
+            user_id=user_id, film_id=film_id
+        )
+        try:
+            await self.db.add_history_record(watched_film)
+        except Exception as e:
+            return str(e)
+        return None
 
 
 @lru_cache()
