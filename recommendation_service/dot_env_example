@@ -1,0 +1,7 @@
+PROJECT_NAME=Recommendations service
+REDIS_HOST=recommendations_redis
+
+REDIS_PORT=6379
+
+movies_api_url=http://api_service:8001
+watching_history_api_url=http://watching_history:8014
