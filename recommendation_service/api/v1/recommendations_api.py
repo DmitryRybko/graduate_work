@@ -23,7 +23,7 @@ def get_recommendations(request: Request, token_parser=Depends(ParseJWTToken)) -
     except KeyError:
         user_email = None
         logger.info(f"user not logged in")
-
+        user_email = "default_user"
     movies_recom = retrieve_recom_movies(user_email)
     logger.debug(movies_recom)
     return RecommendationsResponse(movies_data=movies_recom)
