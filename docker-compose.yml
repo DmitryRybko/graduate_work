@@ -98,7 +98,7 @@ services:
     container_name: final_recommendations
     build: ./recommendation_service
     env_file: ./recommendation_service/.env
-    depends:
+    depends_on:
       - "recommendations_redis"
 
   recommendations_redis:

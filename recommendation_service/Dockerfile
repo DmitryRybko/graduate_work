@@ -2,9 +2,9 @@ from python:3.10-alpine
 
 EXPOSE 8014/tcp
 
-ARG PROJECT_DIR=/project
-ENV PROJECT_DIR=/project
-ENV PYTHONPATH=$PROJECT_DIR/src
+ARG PROJECT_DIR=/recommendation_service
+ENV PROJECT_DIR=/recommendation_service
+ENV PYTHONPATH=/
 
 WORKDIR $PROJECT_DIR
 

@@ -116,6 +116,16 @@ services:
     depends_on:
       - "movies_db"
       - "movies_admin"
+ 
+  recommendations:
+    container_name: final_recommendations
+    build: ./recommendation_service
+    env_file: ./recommendation_service/.env
+    depends_on:
+      - "recommendations_redis"
+    ports:
+      - 8003:8003
+
 
   recommendations_redis:
     container_name: recommendations_redis
