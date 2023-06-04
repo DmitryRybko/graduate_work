@@ -27,5 +27,5 @@ def save_recommendations_for_users(user: str):
 
 if __name__ == "__main__":
     save_recommendations_for_users("email2@emails.ru")
-    # save_recommendations_for_users("default_user")
+    save_recommendations_for_users("default_user")
 
