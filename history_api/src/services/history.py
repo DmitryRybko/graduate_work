@@ -36,6 +36,13 @@ class WatchingHistoryService:
             return str(e)
         return None
 
+    async def is_watched(self, user_id: str, film_id: str) -> bool | str:
+        """Return True if the user has watched the film."""
+        try:
+            return self.db.film_is_watched(user_id, film_id)
+        except Exception as e:
+            return str(e)
+
 
 @lru_cache()
 def get_watching_history_service(

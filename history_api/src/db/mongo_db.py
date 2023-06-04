@@ -34,10 +34,16 @@ class MondoDB(base_db.BaseDB):
 
     async def add_history_record(self, user_id: str, film_id: str) -> None:
         """Add new watching history record."""
-        collection = self.db[user_id]
+        collection = self.db[self.collection_name]
         r = await collection.find({'film_id': film_id, 'user_id': user_id})
         if r:
             await collection.delete_one(
                 {'film_id': film_id, 'user_id': user_id}
             )
         await collection.insert_one({'film_id': film_id, 'user_id': user_id})
+
+    async def film_is_watched(self, user_id: str, film_id: str) -> bool:
+        """Return True if the user has wathed the film."""
+        collection = self.db[self.collection_name]
+        r = await collection.find({'film_id': film_id, 'user_id': user_id})
+        return True if r else False

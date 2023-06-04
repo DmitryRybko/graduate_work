@@ -50,6 +50,21 @@ async def add_watched_film(
         return {'error': result}
 
 
+@router.get('/is-watched', response_model=dict)
+async def film_is_watched(
+    watched_film: WatchingHistory,
+    srv: WatchingHistoryService = Depends(get_watching_history_service)
+) -> dict:
+    """Return True if the user is watched the film."""
+    result: bool | str = srv.is_watched(
+        watched_film.user_id, watched_film.film_id
+    )
+    if type(result) == bool:
+        return {'is_watched': result}
+    else:
+        return {'error': result}
+
+
 # TODO Del this block when the debug is completed.
 # @router.get('/get/{user_id}')
 # def watching_history(user_id: str):

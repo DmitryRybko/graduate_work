@@ -15,3 +15,8 @@ class BaseDB(abc.ABC):
     def add_history_record(self, user_id: str, film_id: str):
         """Create new record with user_id and film_id."""
         pass
+
+    @abc.abstractmethod
+    def film_is_watched(self, user_id: str, film_id: str):
+        """Return True if the user is watched the film."""
+        pass
