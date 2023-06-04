@@ -23,6 +23,8 @@ services:
     depends_on:
       - "auth_redis"
       - "auth_db"
+    ports:
+      - "8002:8002"
   
   auth_redis:
     container_name: final_auth_redis
@@ -35,6 +37,8 @@ services:
     restart: always
     volumes:
       - auth_db:/var/lib/postgresql/data
+    ports:
+      - "54321:5432"
     env_file: ./.auth.env
 
   api_service:
@@ -45,6 +49,8 @@ services:
       - "elasticsearch"
       - "api_redis"
       - "auth"
+    ports:
+      - "8001:8001"
   
   api_redis:
     container_name: final_api_redis
@@ -57,6 +63,8 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
     restart: always
+    ports:
+      - "9200:9200"
     environment:
       - discovery.type=single-node
 
@@ -67,7 +75,6 @@ services:
     depends_on:
       - "elasticsearch"
       - "movies_db"
-    restart: always
   
   movies_db:
     container_name: final_movies_db
@@ -75,17 +82,23 @@ services:
     restart: always
     volumes:
       - movies_db:/var/lib/postgresql/data
+    ports:
+      - "54322:5432"
     env_file: ./.movies.env
   
   movies_admin:
     container_name: final_movies_admin
     build: ../new_admin_panel_sprint_3/etl/main_project/movies_admin
     env_file: ./.movies.env
+    ports:
+      - "8000:8000"
 
   watching_history:
     container_name: final_watching_history
     build: ./history_api
     env_file: ./history_api/.env
+    ports:
+      - "8014:8014"
     depends_on:
       - "watching_history_db"
   
@@ -93,18 +106,33 @@ services:
     container_name: final_watching_history_db
     image: mongo:6
     env_file: ./history_api/.env
-  
+    ports:
+      - "27017:27017"
+
+  fake_data:
+    container_name: final_fake_data
+    build: ./fake_data
+    env_file: ./fake_data/.env
+    depends_on:
+      - "movies_db"
+      - "movies_admin"
+ 
   recommendations:
     container_name: final_recommendations
     build: ./recommendation_service
     env_file: ./recommendation_service/.env
     depends_on:
       - "recommendations_redis"
+    ports:
+      - 8003:8003
+
 
   recommendations_redis:
     container_name: recommendations_redis
     image: redis
     restart: always
+    ports:
+      - "6379:6379"
 
 
 volumes:

@@ -19,7 +19,7 @@ async def main():
         settings.mongo_db_url, settings.mongo_db_db_name
     )
 
-    # await generate_first_data()
+    await generate_first_data()
     await generate_data_by_the_time()
 
 

@@ -23,18 +23,27 @@ class MondoDB(base_db.BaseDB):
         self.db = self.client[self.db_name]
 
     async def get_history_for_user(
-        self, user_id: str
+        self, user_id: str, limit: int = 1000
     ) -> list[WatchingHistory]:
         """Return user watching history."""
         collection = self.db[self.collection_name]
-        history = collection.find({'user_id': user_id}).sort([('$natural', -1)])
-        logger.info("loading history")
+        history: list[WatchingHistory] = collection.find(
+            {'user_id': user_id}).sort([('$natural', -1)]).limit(limit)
+        logger.info('loading history')
         return history
 
     async def add_history_record(self, user_id: str, film_id: str) -> None:
         """Add new watching history record."""
-        collection = self.db[user_id]
+        collection = self.db[self.collection_name]
         r = await collection.find({'film_id': film_id, 'user_id': user_id})
         if r:
-            await collection.delete_one({'film_id': film_id, 'user_id': user_id})
+            await collection.delete_one(
+                {'film_id': film_id, 'user_id': user_id}
+            )
         await collection.insert_one({'film_id': film_id, 'user_id': user_id})
+
+    async def film_is_watched(self, user_id: str, film_id: str) -> bool:
+        """Return True if the user has wathed the film."""
+        collection = self.db[self.collection_name]
+        r = await collection.find({'film_id': film_id, 'user_id': user_id})
+        return True if r else False
