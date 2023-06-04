@@ -1,3 +1,5 @@
+import sys
+
 from fastapi import APIRouter, Request, Depends
 from loguru import logger
 
@@ -6,7 +8,7 @@ from recommendation_service.config import settings
 from recommendation_service.services.jwt_decode import ParseJWTToken
 from recommendation_service.utils.get_recom_from_redis import retrieve_recom_movies
 
-logger.add("debug.log", level=settings.log_level)
+logger.add(sys.stdout, level=settings.log_level)
 
 router = APIRouter()
 
