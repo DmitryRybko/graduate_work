@@ -35,6 +35,7 @@ async def generate_first_data():
     """Generate firs part of fake data to test."""
     auth_db = db.get_auth_db()
     movies_db = db.get_movies_db()
+    watching_history_db = db.get_watching_history_db()
 
     # Wait auth_db
     wait_db(
@@ -70,7 +71,9 @@ async def generate_first_data():
         generate_persons(movies_session)
         generate_film_works(movies_session)
 
-        await generate_watching_history(auth_session, movies_session)
+        await generate_watching_history(
+            auth_session, movies_session, watching_history_db
+        )
 
 
 async def generate_data_by_the_time() -> None:
