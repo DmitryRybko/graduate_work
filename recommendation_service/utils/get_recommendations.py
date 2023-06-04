@@ -7,6 +7,7 @@ from recommendation_service.config import settings
 
 def get_viewed_movies(user_id: str) -> list | None:
     """Return list of user's viewed films."""
+
     logger.debug(f"getting views data for user {user_id}")
 
     url: str = f"{settings.get_watching_history_url}/{user_id}"
@@ -69,6 +70,20 @@ def get_recommended_movies(genre: str) -> dict | str:
     data: dict = {"genre": genre}
 
     response = requests.post(url, json=data)
+
+    if response.status_code == HTTPStatus.OK:
+        logger.debug(f"{response}")
+        logger.debug(f"{response.json()}")
+        return response.json()
+    else:
+        return "Error: " + str(response.status_code)
+
+
+def get_default_movies() -> dict | str:
+    """Return recommended movies to a default user."""
+    url: str = settings.default_recommendations_url
+
+    response = requests.get(url)
 
     if response.status_code == HTTPStatus.OK:
         logger.debug(f"{response}")

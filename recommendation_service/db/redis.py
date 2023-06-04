@@ -1,9 +1,11 @@
 """DB redis module."""
 
-import redis
+from typing import Optional
+from redis.asyncio import Redis
+
+redis: Optional[Redis] = None
 
 
-def get_redis():
+async def get_redis() -> Redis:
     """Return Redis object to work with FastAPI."""
-    redis_conn = redis.Redis(host='localhost', port=6379)
-    return redis_conn
+    return redis

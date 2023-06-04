@@ -8,7 +8,9 @@ from recommendation_service.db.redis import get_redis
 from recommendation_service.utils.get_recommendations import get_recommendations
 
 
-def save_recommendations_for_users(user: str, r: redis.Redis | None = Depends(get_redis)):
+def save_recommendations_for_users(user: str):
+
+    r = redis.Redis(host='localhost', port=6379)
 
     user_id: str = user
     movies: dict | None = get_recommendations(user_id)
@@ -21,3 +23,9 @@ def save_recommendations_for_users(user: str, r: redis.Redis | None = Depends(ge
         r.set(user_id, movies_str)
     else:
         raise Exception('Redis is not available')
+
+
+if __name__ == "__main__":
+    save_recommendations_for_users("email2@emails.ru")
+    # save_recommendations_for_users("default_user")
+

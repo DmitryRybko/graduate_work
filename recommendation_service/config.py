@@ -22,7 +22,11 @@ class Settings(BaseSettings):
     @property
     def get_recommendations_url(self):
         return f"{self.movies_api_url}/api/v1/films/get_recommendations"
-    
+
+    @property
+    def default_recommendations_url(self):
+        return f"{self.movies_api_url}/api/v1/films/default_recommendations"
+
     log_level: str = "DEBUG"
 
     class Config:
