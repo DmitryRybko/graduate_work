@@ -31,7 +31,9 @@ class WatchingHistoryService:
             user_id=user_id, film_id=film_id
         )
         try:
-            await self.db.add_history_record(watched_film)
+            await self.db.add_history_record(
+                watched_film.user_id, watched_film.film_id
+            )
         except Exception as e:
             return str(e)
         return None

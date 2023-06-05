@@ -30,12 +30,12 @@ class MondoDB(base_db.BaseDB):
         history: list[WatchingHistory] = collection.find(
             {'user_id': user_id}).sort([('$natural', -1)]).limit(limit)
         logger.info('loading history')
-        return history
+        return [d async for d in history]
 
     async def add_history_record(self, user_id: str, film_id: str) -> None:
         """Add new watching history record."""
         collection = self.db[self.collection_name]
-        r = await collection.find({'film_id': film_id, 'user_id': user_id})
+        r = await collection.find_one({'film_id': film_id, 'user_id': user_id})
         if r:
             await collection.delete_one(
                 {'film_id': film_id, 'user_id': user_id}

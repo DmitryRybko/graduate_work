@@ -38,7 +38,7 @@ def get_config(mode: str) -> Config:
         raise ValueError(f'Invalid mode: {mode}')
 
 
-mode = 'local'
-# mode = 'docker'
+# mode = 'local'
+mode = 'docker'
 
 config = get_config(mode)
