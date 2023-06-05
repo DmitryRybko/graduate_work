@@ -29,10 +29,11 @@ async def watching_history(
     history: list[WatchingHistory] = await srv.get_history_by_user_id(
         str(user_id), limit
     )
+    logger.debug(history)
     if not history:
         logger.error(f'History list for user {user_id} is empty.')
-    watched_films: list = [h.film_id for h in history]
-    return {history[0].user_id: watched_films}
+    watched_films: list = [h['film_id'] for h in history]
+    return {history[0]['user_id']: watched_films}
 
 
 @router.post('/add/', response_model=dict)
@@ -41,7 +42,7 @@ async def add_watched_film(
     srv: WatchingHistoryService = Depends(get_watching_history_service)
 ) -> dict:
     """Add watched film."""
-    result: None | str = srv.add_watched_film(
+    result: None | str = await srv.add_watched_film(
         watching_history.user_id, watching_history.film_id
     )
     if result is None:
