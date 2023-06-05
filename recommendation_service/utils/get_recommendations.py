@@ -113,10 +113,10 @@ def get_recommendations(user_id: str) -> dict | None:
 
 
 if __name__ == '__main__':
-    # # example usage
-    # viewed_movies = get_viewed_movies("email2@emails.ru")
-    # user_genres = get_genres_for_movies(viewed_movies)
-    # user_top_genre = most_frequent_genre(user_genres)
-    # recommended_movies = get_recommended_movies(user_top_genre)
+    # example usage
+    viewed_movies = get_viewed_movies("email2@emails.ru")
+    user_genres = get_genres_for_movies(viewed_movies)
+    user_top_genre = most_frequent_genre(user_genres)
+    recommended_movies = get_recommended_movies(user_top_genre)
 
-    get_default_movies()
+    # get_default_movies()
